@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS videos (
   date_added DATE NOT NULL DEFAULT CURRENT_DATE
 );
 
+-- Add unit column to existing videos table (if upgrading)
+ALTER TABLE videos ADD COLUMN IF NOT EXISTS unit TEXT NOT NULL DEFAULT 'Unit 1';
+
 -- Resources table
 CREATE TABLE IF NOT EXISTS resources (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -28,6 +31,9 @@ CREATE TABLE IF NOT EXISTS resources (
   subject TEXT NOT NULL DEFAULT 'Methods',
   date_added DATE NOT NULL DEFAULT CURRENT_DATE
 );
+
+-- Add unit column to existing resources table (if upgrading)
+ALTER TABLE resources ADD COLUMN IF NOT EXISTS unit TEXT NOT NULL DEFAULT 'Unit 1';
 
 -- Livestreams table (only one active at a time)
 CREATE TABLE IF NOT EXISTS livestreams (

@@ -54,6 +54,7 @@ export function VideoGrid() {
       <div className="flex items-center gap-1 rounded-xl bg-secondary/50 p-1 overflow-x-auto scrollbar-hide">
         {SUBJECTS.map((subject) => {
           const isActive = selectedSubject === subject
+          const isComingSoon = subject !== 'Methods'
           return (
             <button
               key={subject}
@@ -61,10 +62,15 @@ export function VideoGrid() {
               className={`relative flex-1 min-w-[80px] rounded-lg py-2.5 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 isActive
                   ? 'bg-white text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : isComingSoon
+                    ? 'text-muted-foreground/50'
+                    : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {subject}
+              {isComingSoon && (
+                <span className="ml-1.5 text-[10px] uppercase tracking-wider opacity-60">Soon</span>
+              )}
             </button>
           )
         })}
@@ -167,6 +173,16 @@ export function VideoGrid() {
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
           </div>
           <p className="text-sm text-muted-foreground">Loading videos...</p>
+        </div>
+      ) : selectedSubject !== 'Methods' ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-20">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+            <svg className="h-6 w-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </div>
+          <p className="mb-1 font-medium text-foreground">{selectedSubject} coming soon</p>
+          <p className="text-sm text-muted-foreground">We&apos;re working on adding {selectedSubject.toLowerCase()} maths videos</p>
         </div>
       ) : filteredVideos.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-20">

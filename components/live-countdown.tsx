@@ -40,16 +40,7 @@ export function LiveCountdown() {
   }, [stream])
 
   if (!stream) {
-    return (
-      <div className="rounded-xl bg-secondary/30 p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Next Session</p>
-            <p className="mt-1 text-sm text-foreground">No upcoming livestream scheduled</p>
-          </div>
-        </div>
-      </div>
-    )
+    return null
   }
 
   return (

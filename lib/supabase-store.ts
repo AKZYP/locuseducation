@@ -11,7 +11,7 @@ export async function getVideos(): Promise<Video[]> {
     .order('date_added', { ascending: false })
   
   if (error) {
-    console.error('Error fetching videos:', error)
+    console.error('Error fetching videos:', JSON.stringify(error, null, 2))
     return []
   }
   
@@ -42,7 +42,7 @@ export async function addVideo(video: Omit<Video, 'id' | 'dateAdded'>): Promise<
     .single()
   
   if (error) {
-    console.error('Error adding video:', error)
+    console.error('Error adding video:', JSON.stringify(error, null, 2))
     return null
   }
   
@@ -65,7 +65,7 @@ export async function deleteVideo(id: string): Promise<boolean> {
     .eq('id', id)
   
   if (error) {
-    console.error('Error deleting video:', error)
+    console.error('Error deleting video:', JSON.stringify(error, null, 2))
     return false
   }
   
@@ -80,7 +80,7 @@ export async function getResources(): Promise<Resource[]> {
     .order('date_added', { ascending: false })
   
   if (error) {
-    console.error('Error fetching resources:', error)
+    console.error('Error fetching resources:', JSON.stringify(error, null, 2))
     return []
   }
   
@@ -113,7 +113,7 @@ export async function addResource(resource: Omit<Resource, 'id' | 'dateAdded'>):
     .single()
   
   if (error) {
-    console.error('Error adding resource:', error)
+    console.error('Error adding resource:', JSON.stringify(error, null, 2))
     return null
   }
   
@@ -137,7 +137,7 @@ export async function deleteResource(id: string): Promise<boolean> {
     .eq('id', id)
   
   if (error) {
-    console.error('Error deleting resource:', error)
+    console.error('Error deleting resource:', JSON.stringify(error, null, 2))
     return false
   }
   
@@ -155,7 +155,7 @@ export async function getLiveStream(): Promise<LiveStream | null> {
   
   if (error) {
     if (error.code !== 'PGRST116') { // No rows returned
-      console.error('Error fetching livestream:', error)
+      console.error('Error fetching livestream:', JSON.stringify(error, null, 2))
     }
     return null
   }
@@ -185,7 +185,7 @@ export async function saveLiveStream(stream: Omit<LiveStream, 'id'>): Promise<Li
     .single()
   
   if (error) {
-    console.error('Error saving livestream:', error)
+    console.error('Error saving livestream:', JSON.stringify(error, null, 2))
     return null
   }
   
