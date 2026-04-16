@@ -17,13 +17,13 @@ export function Navbar() {
       <nav className="mx-auto max-w-6xl rounded-full border border-white/20 bg-white/60 shadow-sm backdrop-blur-2xl backdrop-saturate-150">
         <div className="flex items-center justify-between px-5 py-3">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground">
               <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                 <path d="M6 12v5c3 3 9 3 12 0v-5" />
               </svg>
             </div>
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">methodsfree</span>
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">locus</span>
           </Link>
           
           <div className="flex items-center gap-0.5">

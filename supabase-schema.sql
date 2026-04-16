@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS videos (
   title TEXT NOT NULL,
   youtube_url TEXT NOT NULL,
   topic TEXT NOT NULL,
+  unit TEXT NOT NULL DEFAULT 'Unit 1',
   subject TEXT NOT NULL DEFAULT 'Methods',
   description TEXT,
   date_added DATE NOT NULL DEFAULT CURRENT_DATE
@@ -23,6 +24,7 @@ CREATE TABLE IF NOT EXISTS resources (
   file_url TEXT NOT NULL,
   file_name TEXT NOT NULL,
   topic TEXT NOT NULL,
+  unit TEXT NOT NULL DEFAULT 'Unit 1',
   subject TEXT NOT NULL DEFAULT 'Methods',
   date_added DATE NOT NULL DEFAULT CURRENT_DATE
 );
@@ -41,6 +43,17 @@ CREATE TABLE IF NOT EXISTS livestreams (
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE livestreams ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist (to avoid errors on re-run)
+DROP POLICY IF EXISTS "Allow public read access to videos" ON videos;
+DROP POLICY IF EXISTS "Allow public read access to resources" ON resources;
+DROP POLICY IF EXISTS "Allow public read access to livestreams" ON livestreams;
+DROP POLICY IF EXISTS "Allow authenticated insert to videos" ON videos;
+DROP POLICY IF EXISTS "Allow authenticated delete from videos" ON videos;
+DROP POLICY IF EXISTS "Allow authenticated insert to resources" ON resources;
+DROP POLICY IF EXISTS "Allow authenticated delete from resources" ON resources;
+DROP POLICY IF EXISTS "Allow authenticated insert to livestreams" ON livestreams;
+DROP POLICY IF EXISTS "Allow authenticated delete from livestreams" ON livestreams;
 
 -- Create policies for public read access
 CREATE POLICY "Allow public read access to videos" ON videos

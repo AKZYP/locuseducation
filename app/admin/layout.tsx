@@ -3,17 +3,26 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Show, UserButton, SignInButton } from '@clerk/nextjs'
-import { useUser } from '@clerk/nextjs'
+import { useUser, useClerk } from '@clerk/nextjs'
+import { useEffect } from 'react'
 
 const ADMIN_EMAILS = ['apate934@gmail.com', 'Rishpatelau@gmail.com']
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { user, isLoaded } = useUser()
+  const { signOut } = useClerk()
 
   const isAdmin = user?.emailAddresses?.some(
     email => ADMIN_EMAILS.includes(email.emailAddress)
   ) ?? false
+
+  // Automatically sign out non-admin users
+  useEffect(() => {
+    if (isLoaded && user && !isAdmin) {
+      signOut({ redirectUrl: '/' })
+    }
+  }, [isLoaded, user, isAdmin, signOut])
 
   const navItems = [
     { href: '/admin', label: 'Videos' },

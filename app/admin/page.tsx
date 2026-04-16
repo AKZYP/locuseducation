@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { getVideos, addVideo, deleteVideo } from '@/lib/supabase-store'
-import { TOPICS, SUBJECTS } from '@/lib/types'
-import type { Video, Topic, Subject } from '@/lib/types'
+import { SUBJECTS, UNITS, TOPICS_BY_SUBJECT } from '@/lib/types'
+import type { Video, Subject, Unit } from '@/lib/types'
 
 export default function AdminVideosPage() {
   const [videos, setVideos] = useState<Video[]>([])
@@ -12,7 +12,8 @@ export default function AdminVideosPage() {
   const [form, setForm] = useState({
     title: '',
     youtubeUrl: '',
-    topic: 'Differentiation' as Topic,
+    topic: '',
+    unit: 'Unit 1' as Unit,
     subject: 'Methods' as Subject,
     description: ''
   })
@@ -28,13 +29,25 @@ export default function AdminVideosPage() {
     setLoading(false)
   }
 
+  // Get available topics based on selected subject and unit
+  const availableTopics = useMemo(() => {
+    const topics = TOPICS_BY_SUBJECT[form.subject]
+    if (!topics) return []
+    return topics[form.unit]?.filter(t => t !== 'All Topics') || []
+  }, [form.subject, form.unit])
+
+  // Reset topic when subject or unit changes
+  useEffect(() => {
+    setForm(prev => ({ ...prev, topic: availableTopics[0] || '' }))
+  }, [form.subject, form.unit, availableTopics])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.title || !form.youtubeUrl) return
+    if (!form.title || !form.youtubeUrl || !form.topic) return
     
     await addVideo(form)
     await loadVideos()
-    setForm({ title: '', youtubeUrl: '', topic: 'Differentiation', subject: 'Methods', description: '' })
+    setForm({ title: '', youtubeUrl: '', topic: availableTopics[0] || '', unit: 'Unit 1', subject: 'Methods', description: '' })
     setIsAdding(false)
   }
 
@@ -44,8 +57,6 @@ export default function AdminVideosPage() {
       await loadVideos()
     }
   }
-
-  const topicsForSelect = TOPICS.filter(t => t !== 'All Topics')
 
   return (
     <div>
@@ -87,7 +98,7 @@ export default function AdminVideosPage() {
                 required
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-4">
               <select
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value as Subject })}
@@ -98,11 +109,21 @@ export default function AdminVideosPage() {
                 ))}
               </select>
               <select
-                value={form.topic}
-                onChange={(e) => setForm({ ...form, topic: e.target.value as Topic })}
+                value={form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value as Unit })}
                 className="w-full rounded-lg border-0 bg-secondary/50 px-3.5 py-2.5 text-sm text-foreground focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
-                {topicsForSelect.map((topic) => (
+                {UNITS.filter(u => u !== 'All Units').map((unit) => (
+                  <option key={unit} value={unit}>{unit}</option>
+                ))}
+              </select>
+              <select
+                value={form.topic}
+                onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                className="w-full rounded-lg border-0 bg-secondary/50 px-3.5 py-2.5 text-sm text-foreground focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                required
+              >
+                {availableTopics.map((topic) => (
                   <option key={topic} value={topic}>{topic}</option>
                 ))}
               </select>
@@ -155,9 +176,12 @@ export default function AdminVideosPage() {
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-medium text-foreground truncate">{video.title}</h3>
                     <span className="shrink-0 rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary">
+                      {video.unit}
+                    </span>
+                    <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground truncate max-w-[100px]">
                       {video.topic}
                     </span>
-                    <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                       {video.subject}
                     </span>
                   </div>

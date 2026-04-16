@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Methods Free | Free QCE Maths Methods Tutoring',
+  title: 'Locus Education | Free QCE Maths Methods Tutoring',
   description: 'Quality maths tutoring shouldn\'t cost a fortune. Join our free weekly livestreams and access our complete video library. QCE Maths Methods made accessible to everyone.',
   generator: 'v0.app',
   icons: {

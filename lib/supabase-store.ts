@@ -20,6 +20,7 @@ export async function getVideos(): Promise<Video[]> {
     title: v.title,
     youtubeUrl: v.youtube_url,
     topic: v.topic,
+    unit: v.unit,
     subject: v.subject,
     description: v.description,
     dateAdded: v.date_added
@@ -33,6 +34,7 @@ export async function addVideo(video: Omit<Video, 'id' | 'dateAdded'>): Promise<
       title: video.title,
       youtube_url: video.youtubeUrl,
       topic: video.topic,
+      unit: video.unit,
       subject: video.subject,
       description: video.description
     })
@@ -49,6 +51,7 @@ export async function addVideo(video: Omit<Video, 'id' | 'dateAdded'>): Promise<
     title: data.title,
     youtubeUrl: data.youtube_url,
     topic: data.topic,
+    unit: data.unit,
     subject: data.subject,
     description: data.description,
     dateAdded: data.date_added
@@ -88,6 +91,7 @@ export async function getResources(): Promise<Resource[]> {
     fileUrl: r.file_url,
     fileName: r.file_name,
     topic: r.topic,
+    unit: r.unit,
     subject: r.subject,
     dateAdded: r.date_added
   })) || []
@@ -102,6 +106,7 @@ export async function addResource(resource: Omit<Resource, 'id' | 'dateAdded'>):
       file_url: resource.fileUrl,
       file_name: resource.fileName,
       topic: resource.topic,
+      unit: resource.unit,
       subject: resource.subject
     })
     .select()
@@ -119,6 +124,7 @@ export async function addResource(resource: Omit<Resource, 'id' | 'dateAdded'>):
     fileUrl: data.file_url,
     fileName: data.file_name,
     topic: data.topic,
+    unit: data.unit,
     subject: data.subject,
     dateAdded: data.date_added
   }
