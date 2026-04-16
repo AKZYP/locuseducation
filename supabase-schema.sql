@@ -65,22 +65,21 @@ CREATE POLICY "Allow public read access to resources" ON resources
 CREATE POLICY "Allow public read access to livestreams" ON livestreams
   FOR SELECT TO anon USING (true);
 
--- Create policies for authenticated admin write access
--- Note: Admin email check should be done in application layer
-CREATE POLICY "Allow authenticated insert to videos" ON videos
-  FOR INSERT TO authenticated WITH CHECK (true);
+-- Create policies for anonymous admin write access (app handles auth)
+CREATE POLICY "Allow anonymous insert to videos" ON videos
+  FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated delete from videos" ON videos
-  FOR DELETE TO authenticated USING (true);
+CREATE POLICY "Allow anonymous delete from videos" ON videos
+  FOR DELETE TO anon USING (true);
 
-CREATE POLICY "Allow authenticated insert to resources" ON resources
-  FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Allow anonymous insert to resources" ON resources
+  FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated delete from resources" ON resources
-  FOR DELETE TO authenticated USING (true);
+CREATE POLICY "Allow anonymous delete from resources" ON resources
+  FOR DELETE TO anon USING (true);
 
-CREATE POLICY "Allow authenticated insert to livestreams" ON livestreams
-  FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Allow anonymous insert to livestreams" ON livestreams
+  FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated delete from livestreams" ON livestreams
-  FOR DELETE TO authenticated USING (true);
+CREATE POLICY "Allow anonymous delete from livestreams" ON livestreams
+  FOR DELETE TO anon USING (true);

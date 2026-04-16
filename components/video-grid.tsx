@@ -51,14 +51,14 @@ export function VideoGrid() {
   return (
     <div className="space-y-5">
       {/* Subject Tabs */}
-      <div className="flex items-center gap-1 rounded-xl bg-secondary/50 p-1">
+      <div className="flex items-center gap-1 rounded-xl bg-secondary/50 p-1 overflow-x-auto scrollbar-hide">
         {SUBJECTS.map((subject) => {
           const isActive = selectedSubject === subject
           return (
             <button
               key={subject}
               onClick={() => setSelectedSubject(subject)}
-              className={`relative flex-1 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 ${
+              className={`relative flex-1 min-w-[80px] rounded-lg py-2.5 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 isActive
                   ? 'bg-white text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -71,10 +71,10 @@ export function VideoGrid() {
       </div>
 
       {/* Search and Filter Row */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <div className="relative flex-1">
           <svg
-            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -91,13 +91,13 @@ export function VideoGrid() {
             placeholder="Search videos..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border-0 bg-secondary/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+            className="w-full rounded-xl border-0 bg-secondary/50 py-2 pl-9 pr-3 sm:py-2.5 sm:pl-10 sm:pr-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
           />
         </div>
-        
+
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+          className={`flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
             showFilters || selectedUnit !== 'All Units' || selectedTopic !== 'All Topics'
               ? 'bg-foreground text-white'
               : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -106,9 +106,9 @@ export function VideoGrid() {
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
-          Filter
+          <span className="hidden sm:inline">Filter</span>
           {(selectedUnit !== 'All Units' || selectedTopic !== 'All Topics') && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-xs">
+            <span className="flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-white/20 text-[10px] sm:text-xs">
               {(selectedUnit !== 'All Units' ? 1 : 0) + (selectedTopic !== 'All Topics' ? 1 : 0)}
             </span>
           )}
