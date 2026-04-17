@@ -18,6 +18,17 @@ export default function MissionPage() {
 
           <section className="space-y-4 text-[15px] text-muted-foreground leading-relaxed">
             <p>
+              We&apos;re two Year 12 students from Queensland who got tired of watching classmates
+              fall behind because they couldn&apos;t afford a tutor. So we built the alternative —
+              free weekly live sessions on QCE Maths Methods, recorded and open to anyone. No
+              paywalls, no sign-ups, no catch.
+            </p>
+          </section>
+
+          <div className="h-px bg-border" />
+
+          <section className="space-y-4 text-[15px] text-muted-foreground leading-relaxed">
+            <p>
               Private tutoring for QCE Maths Methods costs $60 to $150 per hour. For many students, 
               quality guidance is out of reach. Those who can afford it get ahead. Those who 
               can&apos;t are left behind.
