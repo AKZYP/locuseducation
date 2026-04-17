@@ -73,18 +73,37 @@ export function MottoText() {
       {showSeg4 && (
         <span className="relative inline-block">
           {showSeg4}
-          {/* animated strike line */}
-          <span
+          {/* aggressive scribble */}
+          <svg
+            aria-hidden
+            viewBox="0 0 100 30"
+            preserveAspectRatio="none"
             style={{
               position: 'absolute',
-              left: 0,
-              top: '52%',
-              height: '2px',
-              background: 'currentColor',
-              transition: 'width 0.45s ease',
-              width: isStriking ? '100%' : '0%',
+              left: '-6%',
+              top: '-10%',
+              width: '112%',
+              height: '120%',
+              pointerEvents: 'none',
+              overflow: 'visible',
             }}
-          />
+          >
+            <path
+              d="M 3 15 L 14 5 L 24 22 L 16 8 L 32 24 L 22 3 L 42 20 L 30 6 L 52 23 L 40 4 L 62 21 L 50 7 L 72 22 L 60 3 L 82 20 L 70 6 L 92 22 L 80 5 L 98 18 L 88 12 L 74 4 L 64 20 L 54 8 L 44 22 L 34 4 L 24 20 L 14 8 L 4 18"
+              pathLength={100}
+              stroke="#dc2626"
+              strokeWidth={2.4}
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+              style={{
+                strokeDasharray: 100,
+                strokeDashoffset: isStriking ? 0 : 100,
+                transition: 'stroke-dashoffset 0.55s cubic-bezier(0.5, 0, 0.5, 1)',
+              }}
+            />
+          </svg>
         </span>
       )}
       {/* red arrow + $0 scales in after strike */}
