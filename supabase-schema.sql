@@ -45,10 +45,18 @@ CREATE TABLE IF NOT EXISTS livestreams (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Email subscribers table
+CREATE TABLE IF NOT EXISTS email_subscribers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email TEXT NOT NULL UNIQUE,
+  subscribed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE livestreams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE email_subscribers ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist (to avoid errors on re-run)
 DROP POLICY IF EXISTS "Allow public read access to videos" ON videos;
@@ -71,6 +79,11 @@ CREATE POLICY "Allow public read access to resources" ON resources
 CREATE POLICY "Allow public read access to livestreams" ON livestreams
   FOR SELECT TO anon USING (true);
 
+-- Drop update policies if re-running
+DROP POLICY IF EXISTS "Allow anonymous update to videos" ON videos;
+DROP POLICY IF EXISTS "Allow anonymous update to resources" ON resources;
+DROP POLICY IF EXISTS "Allow anonymous insert to email_subscribers" ON email_subscribers;
+
 -- Create policies for anonymous admin write access (app handles auth)
 CREATE POLICY "Allow anonymous insert to videos" ON videos
   FOR INSERT TO anon WITH CHECK (true);
@@ -89,3 +102,12 @@ CREATE POLICY "Allow anonymous insert to livestreams" ON livestreams
 
 CREATE POLICY "Allow anonymous delete from livestreams" ON livestreams
   FOR DELETE TO anon USING (true);
+
+CREATE POLICY "Allow anonymous update to videos" ON videos
+  FOR UPDATE TO anon USING (true);
+
+CREATE POLICY "Allow anonymous update to resources" ON resources
+  FOR UPDATE TO anon USING (true);
+
+CREATE POLICY "Allow anonymous insert to email_subscribers" ON email_subscribers
+  FOR INSERT TO anon WITH CHECK (true);

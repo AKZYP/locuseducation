@@ -198,6 +198,60 @@ export async function saveLiveStream(stream: Omit<LiveStream, 'id'>): Promise<Li
   }
 }
 
+export async function updateVideo(id: string, updates: Partial<Omit<Video, 'id' | 'dateAdded'>>): Promise<boolean> {
+  const { error } = await supabase
+    .from('videos')
+    .update({
+      title: updates.title,
+      youtube_url: updates.youtubeUrl,
+      topic: updates.topic,
+      unit: updates.unit,
+      subject: updates.subject,
+      description: updates.description
+    })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error updating video:', JSON.stringify(error, null, 2))
+    return false
+  }
+  return true
+}
+
+export async function updateResource(id: string, updates: Partial<Omit<Resource, 'id' | 'dateAdded'>>): Promise<boolean> {
+  const { error } = await supabase
+    .from('resources')
+    .update({
+      title: updates.title,
+      description: updates.description,
+      file_url: updates.fileUrl,
+      file_name: updates.fileName,
+      topic: updates.topic,
+      unit: updates.unit,
+      subject: updates.subject
+    })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error updating resource:', JSON.stringify(error, null, 2))
+    return false
+  }
+  return true
+}
+
+export async function addEmailSubscriber(email: string): Promise<{ success: boolean; alreadyExists: boolean }> {
+  const { error } = await supabase
+    .from('email_subscribers')
+    .insert({ email })
+
+  if (error) {
+    if (error.code === '23505') return { success: true, alreadyExists: true }
+    console.error('Error adding subscriber:', JSON.stringify(error, null, 2))
+    return { success: false, alreadyExists: false }
+  }
+  return { success: true, alreadyExists: false }
+}
+
 export function extractYouTubeId(url: string): string | null {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)

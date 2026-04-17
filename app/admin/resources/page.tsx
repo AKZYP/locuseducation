@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getResources, addResource, deleteResource } from '@/lib/supabase-store'
+import { getResources, addResource, deleteResource, updateResource } from '@/lib/supabase-store'
 import { TOPICS, SUBJECTS } from '@/lib/types'
 import type { Resource, Topic, Subject } from '@/lib/types'
 
 export default function AdminResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([])
   const [isAdding, setIsAdding] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<typeof form | null>(null)
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({
     title: '',
@@ -44,6 +46,27 @@ export default function AdminResourcesPage() {
       await deleteResource(id)
       await loadResources()
     }
+  }
+
+  const startEdit = (resource: Resource) => {
+    setEditingId(resource.id)
+    setEditForm({
+      title: resource.title,
+      description: resource.description,
+      fileUrl: resource.fileUrl,
+      fileName: resource.fileName,
+      topic: resource.topic as Topic,
+      subject: resource.subject as Subject
+    })
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingId || !editForm) return
+    await updateResource(editingId, editForm)
+    await loadResources()
+    setEditingId(null)
+    setEditForm(null)
   }
 
   const topicsForSelect = TOPICS.filter(t => t !== 'All Topics')
@@ -160,35 +183,49 @@ export default function AdminResourcesPage() {
         ) : (
           <div className="divide-y divide-border/50">
             {resources.map((resource) => (
-              <div key={resource.id} className="flex items-center justify-between px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-foreground truncate">{resource.title}</h3>
-                    <span className="shrink-0 rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary">
-                      {resource.topic}
-                    </span>
-                    <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                      {resource.subject}
-                    </span>
+              <div key={resource.id}>
+                {editingId === resource.id && editForm ? (
+                  <div className="px-4 py-3 bg-secondary/20">
+                    <form onSubmit={handleEditSubmit} className="space-y-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input type="text" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} placeholder="Title" className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" required />
+                        <input type="text" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Description" className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input type="url" value={editForm.fileUrl} onChange={(e) => setEditForm({ ...editForm, fileUrl: e.target.value })} placeholder="File URL" className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" required />
+                        <input type="text" value={editForm.fileName} onChange={(e) => setEditForm({ ...editForm, fileName: e.target.value })} placeholder="File name" className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <select value={editForm.subject} onChange={(e) => setEditForm({ ...editForm, subject: e.target.value as Subject })} className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                          {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <select value={editForm.topic} onChange={(e) => setEditForm({ ...editForm, topic: e.target.value as Topic })} className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                          {topicsForSelect.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex gap-2">
+                        <button type="submit" className="rounded-lg bg-foreground px-4 py-1.5 text-xs font-medium text-white hover:bg-foreground/90">Save</button>
+                        <button type="button" onClick={() => setEditingId(null)} className="rounded-lg bg-secondary/50 px-4 py-1.5 text-xs font-medium text-foreground hover:bg-secondary">Cancel</button>
+                      </div>
+                    </form>
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground truncate">{resource.description}</p>
-                </div>
-                <div className="flex items-center gap-3 ml-4">
-                  <a
-                    href={resource.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-primary hover:underline"
-                  >
-                    View
-                  </a>
-                  <button
-                    onClick={() => handleDelete(resource.id)}
-                    className="text-xs text-red-500 hover:text-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-medium text-foreground truncate">{resource.title}</h3>
+                        <span className="shrink-0 rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary">{resource.topic}</span>
+                        <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">{resource.subject}</span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground truncate">{resource.description}</p>
+                    </div>
+                    <div className="flex items-center gap-3 ml-4">
+                      <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View</a>
+                      <button onClick={() => startEdit(resource)} className="text-xs text-muted-foreground hover:text-foreground">Edit</button>
+                      <button onClick={() => handleDelete(resource.id)} className="text-xs text-red-500 hover:text-red-600">Delete</button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

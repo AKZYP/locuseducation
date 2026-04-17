@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { getVideos, addVideo, deleteVideo } from '@/lib/supabase-store'
+import { getVideos, addVideo, deleteVideo, updateVideo } from '@/lib/supabase-store'
 import { SUBJECTS, UNITS, TOPICS_BY_SUBJECT } from '@/lib/types'
 import type { Video, Subject, Unit } from '@/lib/types'
 
 export default function AdminVideosPage() {
   const [videos, setVideos] = useState<Video[]>([])
   const [isAdding, setIsAdding] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<typeof form | null>(null)
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({
     title: '',
@@ -56,6 +58,27 @@ export default function AdminVideosPage() {
       await deleteVideo(id)
       await loadVideos()
     }
+  }
+
+  const startEdit = (video: Video) => {
+    setEditingId(video.id)
+    setEditForm({
+      title: video.title,
+      youtubeUrl: video.youtubeUrl,
+      topic: video.topic,
+      unit: video.unit,
+      subject: video.subject,
+      description: video.description
+    })
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingId || !editForm) return
+    await updateVideo(editingId, editForm)
+    await loadVideos()
+    setEditingId(null)
+    setEditForm(null)
   }
 
   return (
@@ -171,38 +194,50 @@ export default function AdminVideosPage() {
         ) : (
           <div className="divide-y divide-border/50">
             {videos.map((video) => (
-              <div key={video.id} className="flex items-center justify-between px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-foreground truncate">{video.title}</h3>
-                    <span className="shrink-0 rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary">
-                      {video.unit}
-                    </span>
-                    <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground truncate max-w-[100px]">
-                      {video.topic}
-                    </span>
-                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                      {video.subject}
-                    </span>
+              <div key={video.id}>
+                {editingId === video.id && editForm ? (
+                  <div className="px-4 py-3 bg-secondary/20">
+                    <form onSubmit={handleEditSubmit} className="space-y-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input type="text" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} placeholder="Title" className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" required />
+                        <input type="url" value={editForm.youtubeUrl} onChange={(e) => setEditForm({ ...editForm, youtubeUrl: e.target.value })} placeholder="YouTube URL" className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" required />
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-4">
+                        <select value={editForm.subject} onChange={(e) => setEditForm({ ...editForm, subject: e.target.value as Subject })} className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                          {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <select value={editForm.unit} onChange={(e) => setEditForm({ ...editForm, unit: e.target.value as Unit })} className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                          {UNITS.filter(u => u !== 'All Units').map(u => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                        <select value={editForm.topic} onChange={(e) => setEditForm({ ...editForm, topic: e.target.value })} className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                          {availableTopics.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                        <input type="text" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Description" className="w-full rounded-lg border-0 bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      </div>
+                      <div className="flex gap-2">
+                        <button type="submit" className="rounded-lg bg-foreground px-4 py-1.5 text-xs font-medium text-white hover:bg-foreground/90">Save</button>
+                        <button type="button" onClick={() => setEditingId(null)} className="rounded-lg bg-secondary/50 px-4 py-1.5 text-xs font-medium text-foreground hover:bg-secondary">Cancel</button>
+                      </div>
+                    </form>
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground truncate">{video.description}</p>
-                </div>
-                <div className="flex items-center gap-3 ml-4">
-                  <a
-                    href={video.youtubeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-primary hover:underline"
-                  >
-                    View
-                  </a>
-                  <button
-                    onClick={() => handleDelete(video.id)}
-                    className="text-xs text-red-500 hover:text-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-medium text-foreground truncate">{video.title}</h3>
+                        <span className="shrink-0 rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary">{video.unit}</span>
+                        <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground truncate max-w-[100px]">{video.topic}</span>
+                        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">{video.subject}</span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground truncate">{video.description}</p>
+                    </div>
+                    <div className="flex items-center gap-3 ml-4">
+                      <a href={video.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View</a>
+                      <button onClick={() => startEdit(video)} className="text-xs text-muted-foreground hover:text-foreground">Edit</button>
+                      <button onClick={() => handleDelete(video.id)} className="text-xs text-red-500 hover:text-red-600">Delete</button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { Navbar } from '@/components/navbar'
-import { getResources } from '@/lib/store'
+import { getResources } from '@/lib/supabase-store'
 import { TOPICS, SUBJECTS } from '@/lib/types'
 import type { Resource, Topic, Subject } from '@/lib/types'
 
@@ -13,8 +13,13 @@ export default function ResourcesPage() {
   const [selectedSubject, setSelectedSubject] = useState<Subject>('Methods')
   const [showFilters, setShowFilters] = useState(false)
 
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
-    setResources(getResources())
+    getResources().then(data => {
+      setResources(data)
+      setLoading(false)
+    })
   }, [])
 
   const filteredResources = useMemo(() => {
