@@ -15,8 +15,8 @@ const MONTHS = [
 const WEEKLY_SCHEDULE: Record<number, QCESubject> = {
   1: 'Methods',
   2: 'Specialist',
-  3: 'Physics',
-  4: 'Chemistry',
+  // 3: 'Physics',   — not yet active
+  // 4: 'Chemistry', — not yet active
 }
 
 function getRecurringEvents(year: number, month: number): CalendarEvent[] {

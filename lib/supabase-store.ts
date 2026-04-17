@@ -308,6 +308,22 @@ export async function deleteCalendarEvent(id: string): Promise<boolean> {
   return true
 }
 
+// Site config
+export async function getSiteShutdown(): Promise<boolean> {
+  const { data } = await supabase
+    .from('site_config')
+    .select('value')
+    .eq('key', 'shutdown')
+    .single()
+  return data?.value === 'true'
+}
+
+export async function setSiteShutdown(active: boolean): Promise<void> {
+  await supabase
+    .from('site_config')
+    .upsert({ key: 'shutdown', value: String(active) })
+}
+
 export function extractYouTubeId(url: string): string | null {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)

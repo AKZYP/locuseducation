@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Space_Grotesk, Instrument_Serif } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ClerkProvider } from '@clerk/nextjs'
+import { ShutdownOverlay } from '@/components/shutdown-overlay'
 import './globals.css'
 
 const inter = Inter({
@@ -53,6 +54,7 @@ export default function RootLayout({
     <html lang="en" className="bg-background">
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} font-sans antialiased`}>
         <ClerkProvider>
+          <ShutdownOverlay />
           {children}
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </ClerkProvider>

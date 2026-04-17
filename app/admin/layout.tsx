@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Show, UserButton, SignInButton } from '@clerk/nextjs'
 import { useUser, useClerk } from '@clerk/nextjs'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { getSiteShutdown, setSiteShutdown } from '@/lib/supabase-store'
 
 const ADMIN_EMAILS = ['apate934@gmail.com', 'rishpatelau@gmail.com']
 
@@ -12,10 +13,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const { user, isLoaded } = useUser()
   const { signOut } = useClerk()
+  const [shutdown, setShutdown] = useState(false)
+  const [shutdownLoading, setShutdownLoading] = useState(false)
 
   const isAdmin = user?.emailAddresses?.some(
     email => ADMIN_EMAILS.includes(email.emailAddress)
   ) ?? false
+
+  useEffect(() => {
+    if (isAdmin) {
+      getSiteShutdown().then(setShutdown)
+    }
+  }, [isAdmin])
+
+  const toggleShutdown = async () => {
+    const next = !shutdown
+    const msg = next
+      ? 'Activate emergency shutdown? The site will show a "Sessions Paused" message to all visitors.'
+      : 'Restore the site? Visitors will be able to access it again.'
+    if (!confirm(msg)) return
+    setShutdownLoading(true)
+    await setSiteShutdown(next)
+    setShutdown(next)
+    setShutdownLoading(false)
+  }
 
   // Automatically sign out non-admin users
   useEffect(() => {
@@ -116,6 +137,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
                 
                 <div className="flex items-center gap-3">
+                  {shutdown && (
+                    <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-medium text-red-600">
+                      Shutdown active
+                    </span>
+                  )}
+                  <button
+                    onClick={toggleShutdown}
+                    disabled={shutdownLoading}
+                    className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all duration-200 ${
+                      shutdown
+                        ? 'bg-red-500 text-white hover:bg-red-600'
+                        : 'bg-red-50 text-red-600 hover:bg-red-100'
+                    }`}
+                  >
+                    {shutdownLoading ? '...' : shutdown ? 'Restore site' : 'Emergency shutdown'}
+                  </button>
                   <Link
                     href="/"
                     className="text-[13px] text-muted-foreground hover:text-foreground"
