@@ -28,6 +28,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin', label: 'Videos' },
     { href: '/admin/resources', label: 'Resources' },
     { href: '/admin/livestream', label: 'Livestream' },
+    { href: '/admin/calendar', label: 'Schedule' },
   ]
 
   return (

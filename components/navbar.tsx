@@ -11,6 +11,8 @@ export function Navbar() {
   const links = [
     { href: '/', label: 'Videos' },
     { href: '/resources', label: 'Resources' },
+    { href: '/tutors', label: 'Tutors' },
+    { href: '/calendar', label: 'Calendar' },
     { href: '/mission', label: 'Our Mission' },
   ]
 

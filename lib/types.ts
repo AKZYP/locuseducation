@@ -155,3 +155,24 @@ Object.values(TOPICS_BY_SUBJECT).forEach(subjectTopics => {
 })
 export const TOPICS = Array.from(allTopics)
 export type Topic = typeof TOPICS[number]
+
+// Calendar
+export interface CalendarEvent {
+  id: string
+  title: string
+  date: string // YYYY-MM-DD
+  color: EventColor
+  description: string
+  createdAt: string
+}
+
+export const EVENT_COLORS = {
+  blue:   { label: 'Blue',   bg: '#dbeafe', text: '#1d4ed8' },
+  purple: { label: 'Purple', bg: '#f3e8ff', text: '#7e22ce' },
+  green:  { label: 'Green',  bg: '#dcfce7', text: '#15803d' },
+  orange: { label: 'Orange', bg: '#ffedd5', text: '#c2410c' },
+  red:    { label: 'Red',    bg: '#fee2e2', text: '#b91c1c' },
+  pink:   { label: 'Pink',   bg: '#fce7f3', text: '#be185d' },
+} as const
+
+export type EventColor = keyof typeof EVENT_COLORS

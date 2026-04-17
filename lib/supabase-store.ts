@@ -233,6 +233,81 @@ export async function removeEmailSubscriber(email: string): Promise<{ success: b
   return { success: true, notFound: false }
 }
 
+// Calendar Events
+// Run this SQL in Supabase to create the table:
+// create table calendar_events (
+//   id uuid default gen_random_uuid() primary key,
+//   title text not null,
+//   date date not null,
+//   color text not null default 'blue',
+//   description text not null default '',
+//   created_at timestamp with time zone default now()
+// );
+
+import type { CalendarEvent, EventColor } from './types'
+
+export async function getCalendarEvents(): Promise<CalendarEvent[]> {
+  const { data, error } = await supabase
+    .from('calendar_events')
+    .select('*')
+    .order('date', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching calendar events:', JSON.stringify(error, null, 2))
+    return []
+  }
+
+  return data?.map(e => ({
+    id: e.id,
+    title: e.title,
+    date: e.date,
+    color: e.color as EventColor,
+    description: e.description,
+    createdAt: e.created_at
+  })) || []
+}
+
+export async function addCalendarEvent(event: Omit<CalendarEvent, 'id' | 'createdAt'>): Promise<CalendarEvent | null> {
+  const { data, error } = await supabase
+    .from('calendar_events')
+    .insert({
+      title: event.title,
+      date: event.date,
+      color: event.color,
+      description: event.description
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error adding calendar event:', JSON.stringify(error, null, 2))
+    return null
+  }
+
+  return {
+    id: data.id,
+    title: data.title,
+    date: data.date,
+    color: data.color as EventColor,
+    description: data.description,
+    createdAt: data.created_at
+  }
+}
+
+export async function deleteCalendarEvent(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('calendar_events')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error deleting calendar event:', JSON.stringify(error, null, 2))
+    return false
+  }
+
+  return true
+}
+
 export function extractYouTubeId(url: string): string | null {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)
