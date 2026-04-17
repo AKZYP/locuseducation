@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { getVideos, extractYouTubeId } from '@/lib/supabase-store'
-import { SUBJECTS, UNITS, TOPICS_BY_SUBJECT } from '@/lib/types'
+import { UNITS, TOPICS_BY_SUBJECT } from '@/lib/types'
 import type { Video, Subject, Unit } from '@/lib/types'
 
-export function VideoGrid() {
+interface Props {
+  subject: Subject
+}
+
+export function VideoGrid({ subject: selectedSubject }: Props) {
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [selectedSubject, setSelectedSubject] = useState<Subject>('Methods')
   const [selectedUnit, setSelectedUnit] = useState<Unit>('All Units')
   const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
   const [showFilters, setShowFilters] = useState(false)
@@ -50,34 +53,8 @@ export function VideoGrid() {
 
   return (
     <div className="space-y-5">
-      {/* Subject Tabs */}
-      <div className="flex items-center gap-1 rounded-xl bg-secondary/50 p-1 overflow-x-auto scrollbar-hide">
-        {SUBJECTS.map((subject) => {
-          const isActive = selectedSubject === subject
-          const isComingSoon = subject !== 'Methods'
-          return (
-            <button
-              key={subject}
-              onClick={() => setSelectedSubject(subject)}
-              className={`relative flex-1 min-w-[80px] rounded-lg py-2.5 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                isActive
-                  ? 'bg-white text-foreground shadow-sm'
-                  : isComingSoon
-                    ? 'text-muted-foreground/50'
-                    : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {subject}
-              {isComingSoon && (
-                <span className="ml-1.5 text-[10px] uppercase tracking-wider opacity-60">Soon</span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-
       {/* Subject Tagline */}
-      <p className="text-xs text-muted-foreground -mt-1">
+      <p className="text-xs text-muted-foreground">
         {selectedSubject === 'Methods' && 'Watch. Rewatch. Ace it.'}
         {selectedSubject === 'Specialist' && 'Specialist dropping soon. Sit tight.'}
       </p>
