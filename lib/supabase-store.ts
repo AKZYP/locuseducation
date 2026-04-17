@@ -211,6 +211,28 @@ export async function addEmailSubscriber(email: string): Promise<{ success: bool
   return { success: true, alreadyExists: false }
 }
 
+export async function removeEmailSubscriber(email: string): Promise<{ success: boolean; notFound: boolean }> {
+  // Check if exists first
+  const { data } = await supabase
+    .from('email_subscribers')
+    .select('email')
+    .eq('email', email)
+    .single()
+
+  if (!data) return { success: false, notFound: true }
+
+  const { error } = await supabase
+    .from('email_subscribers')
+    .delete()
+    .eq('email', email)
+
+  if (error) {
+    console.error('Error removing subscriber:', JSON.stringify(error, null, 2))
+    return { success: false, notFound: false }
+  }
+  return { success: true, notFound: false }
+}
+
 export function extractYouTubeId(url: string): string | null {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)

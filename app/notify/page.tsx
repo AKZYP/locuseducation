@@ -9,6 +9,7 @@ import type { LiveStream } from '@/lib/types'
 export default function NotifyPage() {
   const [stream, setStream] = useState<LiveStream | null>(null)
   const [email, setEmail] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'exists' | 'error'>('idle')
 
   useEffect(() => {
@@ -17,6 +18,7 @@ export default function NotifyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!agreed) return
     setStatus('loading')
     const result = await addEmailSubscriber(email)
     setStatus(result.alreadyExists ? 'exists' : result.success ? 'success' : 'error')
@@ -63,7 +65,7 @@ export default function NotifyPage() {
               </a>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="mb-1.5 block text-xs font-medium text-foreground">
                   Email address
@@ -80,10 +82,31 @@ export default function NotifyPage() {
                 />
               </div>
 
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  required
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-foreground"
+                />
+                <span className="text-xs text-muted-foreground leading-relaxed">
+                  I agree to receive session reminder emails from Locus Education.
+                  I can{' '}
+                  <a href="/unsubscribe" className="underline underline-offset-2 hover:text-foreground">
+                    unsubscribe
+                  </a>
+                  {' '}at any time. See our{' '}
+                  <a href="/terms" className="underline underline-offset-2 hover:text-foreground">
+                    terms &amp; privacy
+                  </a>.
+                </span>
+              </label>
+
               <button
                 type="submit"
-                disabled={status === 'loading'}
-                className="w-full rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-foreground/90 disabled:opacity-50"
+                disabled={status === 'loading' || !agreed}
+                className="w-full rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {status === 'loading' ? 'Adding you…' : 'Notify me'}
               </button>
@@ -91,10 +114,6 @@ export default function NotifyPage() {
               {status === 'error' && (
                 <p className="text-xs text-red-500">Something went wrong. Try again?</p>
               )}
-
-              <p className="pt-2 text-xs text-muted-foreground">
-                One email per session. No spam, no sharing — promise.
-              </p>
             </form>
           )}
         </div>
