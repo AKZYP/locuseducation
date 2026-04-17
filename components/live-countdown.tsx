@@ -2,16 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { getLiveStream } from '@/lib/store'
-import { addEmailSubscriber } from '@/lib/supabase-store'
 import type { LiveStream } from '@/lib/types'
 
 export function LiveCountdown() {
   const [stream, setStream] = useState<LiveStream | null>(null)
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
   const [isLive, setIsLive] = useState(false)
-  const [showEmailForm, setShowEmailForm] = useState(false)
-  const [email, setEmail] = useState('')
-  const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'exists' | 'error'>('idle')
 
   useEffect(() => {
     setStream(getLiveStream())
@@ -66,7 +62,7 @@ export function LiveCountdown() {
           <h3 className="text-base font-semibold text-foreground">{stream.title}</h3>
           <p className="mt-0.5 text-sm text-muted-foreground">{stream.description}</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {!isLive && (
             <div className="flex gap-2">
@@ -85,7 +81,7 @@ export function LiveCountdown() {
               ))}
             </div>
           )}
-          
+
           {isLive ? (
             <a
               href={stream.youtubeUrl}
@@ -95,51 +91,13 @@ export function LiveCountdown() {
             >
               Join
             </a>
-          ) : emailStatus === 'success' || emailStatus === 'exists' ? (
-            <p className="text-sm font-medium text-foreground">
-              {emailStatus === 'exists' ? "You're already on the list" : "You're on the list"}
-            </p>
-          ) : showEmailForm ? (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault()
-                setEmailStatus('loading')
-                const result = await addEmailSubscriber(email)
-                setEmailStatus(result.alreadyExists ? 'exists' : result.success ? 'success' : 'error')
-                setShowEmailForm(false)
-              }}
-              className="flex items-center gap-2"
-            >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-                className="w-40 rounded-lg border-0 bg-secondary/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <button
-                type="submit"
-                disabled={emailStatus === 'loading'}
-                className="rounded-lg bg-foreground px-3 py-2 text-sm font-medium text-white hover:bg-foreground/90 disabled:opacity-50"
-              >
-                Notify me
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowEmailForm(false)}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                ✕
-              </button>
-            </form>
           ) : (
-            <button
-              onClick={() => setShowEmailForm(true)}
+            <a
+              href="/notify"
               className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-foreground/90"
             >
               Get notified
-            </button>
+            </a>
           )}
         </div>
       </div>
