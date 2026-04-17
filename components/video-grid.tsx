@@ -76,6 +76,12 @@ export function VideoGrid() {
         })}
       </div>
 
+      {/* Subject Tagline */}
+      <p className="text-xs text-muted-foreground -mt-1">
+        {selectedSubject === 'Methods' && 'Watch. Rewatch. Ace it.'}
+        {selectedSubject === 'Specialist' && 'Specialist dropping soon. Sit tight.'}
+      </p>
+
       {/* Search and Filter Row */}
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="relative flex-1">

@@ -30,7 +30,7 @@ export interface LiveStream {
   description: string
 }
 
-export const SUBJECTS = ['Methods', 'Specialist', 'General'] as const
+export const SUBJECTS = ['Methods', 'Specialist'] as const
 export type Subject = typeof SUBJECTS[number]
 
 export const UNITS = ['All Units', 'Unit 1', 'Unit 2', 'Unit 3', 'Unit 4'] as const
