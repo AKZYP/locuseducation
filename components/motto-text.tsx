@@ -51,11 +51,23 @@ export function MottoText() {
 
   return (
     <p
-      className="mb-4 text-3xl font-semibold leading-tight text-foreground"
+      className="mb-4 text-3xl font-medium leading-tight text-foreground"
       style={{ fontFamily: 'var(--font-display)' }}
     >
       {showSeg1}
-      {showSeg2 && <strong>{showSeg2}</strong>}
+      {showSeg2 && (
+        <em
+          style={{
+            fontFamily: 'var(--font-serif)',
+            fontStyle: 'italic',
+            fontWeight: 400,
+            fontSize: '1.15em',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          {showSeg2}
+        </em>
+      )}
       {showSeg3}
       {showSeg4 && (
         <span className="relative inline-block">
@@ -74,13 +86,19 @@ export function MottoText() {
           />
         </span>
       )}
-      {/* $0 fades in after strike */}
+      {/* $0 scales in after strike */}
       {showSeg4 === SEG4 && (
         <span
           style={{
-            marginLeft: '0.35em',
+            display: 'inline-block',
+            marginLeft: '0.4em',
+            fontSize: '1.6em',
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
             opacity: isRevealed ? 1 : 0,
-            transition: 'opacity 0.4s ease',
+            transform: isRevealed ? 'scale(1)' : 'scale(0.6)',
+            transformOrigin: 'left center',
+            transition: 'opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
           $0
