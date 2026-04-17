@@ -6,7 +6,7 @@ import { Show, UserButton, SignInButton } from '@clerk/nextjs'
 import { useUser, useClerk } from '@clerk/nextjs'
 import { useEffect } from 'react'
 
-const ADMIN_EMAILS = ['apate934@gmail.com', 'Rishpatelau@gmail.com']
+const ADMIN_EMAILS = ['apate934@gmail.com', 'rishpatelau@gmail.com']
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
