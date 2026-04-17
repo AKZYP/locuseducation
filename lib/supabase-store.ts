@@ -198,6 +198,19 @@ export async function saveLiveStream(stream: Omit<LiveStream, 'id'>): Promise<Li
   }
 }
 
+export async function addEmailSubscriber(email: string): Promise<{ success: boolean; alreadyExists: boolean }> {
+  const { error } = await supabase
+    .from('email_subscribers')
+    .insert({ email })
+
+  if (error) {
+    if (error.code === '23505') return { success: true, alreadyExists: true }
+    console.error('Error adding subscriber:', JSON.stringify(error, null, 2))
+    return { success: false, alreadyExists: false }
+  }
+  return { success: true, alreadyExists: false }
+}
+
 export function extractYouTubeId(url: string): string | null {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)

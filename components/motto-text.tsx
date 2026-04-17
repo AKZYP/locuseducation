@@ -63,6 +63,7 @@ export function MottoText() {
             fontWeight: 400,
             fontSize: '1.15em',
             letterSpacing: '-0.01em',
+            color: '#b45309',
           }}
         >
           {showSeg2}
@@ -86,22 +87,20 @@ export function MottoText() {
           />
         </span>
       )}
-      {/* $0 scales in after strike */}
+      {/* red arrow + $0 scales in after strike */}
       {showSeg4 === SEG4 && (
         <span
           style={{
             display: 'inline-block',
             marginLeft: '0.4em',
-            fontSize: '1.6em',
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
             opacity: isRevealed ? 1 : 0,
             transform: isRevealed ? 'scale(1)' : 'scale(0.6)',
             transformOrigin: 'left center',
             transition: 'opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          $0
+          <span style={{ color: '#dc2626', fontWeight: 700, marginRight: '0.15em', fontSize: '0.9em' }}>→</span>
+          <span style={{ fontSize: '1.6em', fontWeight: 700, letterSpacing: '-0.02em' }}>$0</span>
         </span>
       )}
       {/* blinking cursor while typing */}
