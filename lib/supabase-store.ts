@@ -198,10 +198,10 @@ export async function saveLiveStream(stream: Omit<LiveStream, 'id'>): Promise<Li
   }
 }
 
-export async function addEmailSubscriber(email: string): Promise<{ success: boolean; alreadyExists: boolean }> {
+export async function addEmailSubscriber(email: string, subject: string): Promise<{ success: boolean; alreadyExists: boolean }> {
   const { error } = await supabase
     .from('email_subscribers')
-    .insert({ email })
+    .insert({ email, subject })
 
   if (error) {
     if (error.code === '23505') return { success: true, alreadyExists: true }
