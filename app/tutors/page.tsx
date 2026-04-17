@@ -1,37 +1,66 @@
 import { Navbar } from '@/components/navbar'
 
+const SUBJECT_STYLES: Record<string, { bg: string; text: string }> = {
+  'Methods':   { bg: '#dbeafe', text: '#1d4ed8' },
+  'Specialist': { bg: '#f3e8ff', text: '#7e22ce' },
+  'Physics':   { bg: '#ffedd5', text: '#c2410c' },
+  'Chemistry': { bg: '#dcfce7', text: '#15803d' },
+}
+
 const TUTORS = [
   {
     name: 'Tutor Name',
-    role: 'QCE Maths Methods',
-    school: 'Year 12, Queensland',
-    bio: 'Add a short bio here — your background, what you love about maths, and why you volunteer to help other students.',
+    uni: 'University Name',
+    degree: 'Bachelor of Something',
+    subjects: ['Methods', 'Specialist'],
+    bio: 'Add a short bio here — your degree, what you enjoy about these subjects, and why you volunteer to help QCE students.',
     initials: 'TN',
     hue: '220',
   },
   {
     name: 'Tutor Name',
-    role: 'QCE Maths Methods',
-    school: 'Year 12, Queensland',
-    bio: 'Add a short bio here — your background, what you love about maths, and why you volunteer to help other students.',
+    uni: 'University Name',
+    degree: 'Bachelor of Something',
+    subjects: ['Physics', 'Chemistry'],
+    bio: 'Add a short bio here — your degree, what you enjoy about these subjects, and why you volunteer to help QCE students.',
     initials: 'TN',
     hue: '160',
   },
   {
     name: 'Tutor Name',
-    role: 'QCE Maths Methods',
-    school: 'Year 12, Queensland',
-    bio: 'Add a short bio here — your background, what you love about maths, and why you volunteer to help other students.',
+    uni: 'University Name',
+    degree: 'Bachelor of Something',
+    subjects: ['Methods'],
+    bio: 'Add a short bio here — your degree, what you enjoy about these subjects, and why you volunteer to help QCE students.',
     initials: 'TN',
     hue: '280',
   },
   {
     name: 'Tutor Name',
-    role: 'QCE Maths Methods',
-    school: 'Year 12, Queensland',
-    bio: 'Add a short bio here — your background, what you love about maths, and why you volunteer to help other students.',
+    uni: 'University Name',
+    degree: 'Bachelor of Something',
+    subjects: ['Specialist', 'Physics'],
+    bio: 'Add a short bio here — your degree, what you enjoy about these subjects, and why you volunteer to help QCE students.',
     initials: 'TN',
     hue: '30',
+  },
+  {
+    name: 'Tutor Name',
+    uni: 'University Name',
+    degree: 'Bachelor of Something',
+    subjects: ['Chemistry'],
+    bio: 'Add a short bio here — your degree, what you enjoy about these subjects, and why you volunteer to help QCE students.',
+    initials: 'TN',
+    hue: '340',
+  },
+  {
+    name: 'Tutor Name',
+    uni: 'University Name',
+    degree: 'Bachelor of Something',
+    subjects: ['Methods', 'Physics'],
+    bio: 'Add a short bio here — your degree, what you enjoy about these subjects, and why you volunteer to help QCE students.',
+    initials: 'TN',
+    hue: '190',
   },
 ]
 
@@ -45,34 +74,46 @@ export default function TutorsPage() {
           <p className="mb-2 text-xs font-medium uppercase tracking-wider text-primary">Meet the team</p>
           <h1 className="text-2xl font-semibold text-foreground leading-tight">Our Tutors</h1>
           <p className="mt-2 text-[15px] text-muted-foreground">
-            Volunteer tutors delivering free, high-quality QCE maths sessions every week.
+            University students volunteering their time to deliver free QCE tutoring in Maths, Physics, and Chemistry.
           </p>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {TUTORS.map((tutor, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border border-border/50 bg-white p-5 shadow-sm"
-            >
-              {/* Avatar */}
-              <div
-                className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl text-xl font-semibold"
-                style={{
-                  backgroundColor: `hsl(${tutor.hue} 60% 92%)`,
-                  color: `hsl(${tutor.hue} 60% 35%)`,
-                }}
-              >
-                {tutor.initials}
+            <div key={i} className="rounded-2xl border border-border/50 bg-white p-5 shadow-sm flex flex-col">
+              <div className="flex items-start gap-4 mb-4">
+                {/* Avatar */}
+                <div
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-base font-semibold"
+                  style={{
+                    backgroundColor: `hsl(${tutor.hue} 60% 92%)`,
+                    color: `hsl(${tutor.hue} 60% 35%)`,
+                  }}
+                >
+                  {tutor.initials}
+                </div>
+
+                <div className="min-w-0">
+                  <h2 className="text-[15px] font-semibold text-foreground">{tutor.name}</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">{tutor.degree}</p>
+                  <p className="text-xs text-muted-foreground">{tutor.uni}</p>
+                </div>
               </div>
 
-              <h2 className="text-[15px] font-semibold text-foreground">{tutor.name}</h2>
-              <p className="mt-0.5 text-xs font-medium text-primary">{tutor.role}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{tutor.school}</p>
+              {/* Subject badges */}
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {tutor.subjects.map(s => (
+                  <span
+                    key={s}
+                    className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                    style={{ backgroundColor: SUBJECT_STYLES[s].bg, color: SUBJECT_STYLES[s].text }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
 
-              <div className="my-3 h-px bg-border/50" />
-
-              <p className="text-sm text-muted-foreground leading-relaxed">{tutor.bio}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed flex-1">{tutor.bio}</p>
             </div>
           ))}
         </div>

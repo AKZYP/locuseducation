@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { getCalendarEvents, addCalendarEvent, deleteCalendarEvent } from '@/lib/supabase-store'
-import { EVENT_COLORS } from '@/lib/types'
-import type { CalendarEvent, EventColor } from '@/lib/types'
-
-const COLOR_KEYS = Object.keys(EVENT_COLORS) as EventColor[]
+import { SUBJECT_COLORS, QCE_SUBJECTS } from '@/lib/types'
+import type { CalendarEvent, QCESubject } from '@/lib/types'
 
 export default function AdminCalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
@@ -14,7 +12,7 @@ export default function AdminCalendarPage() {
   const [form, setForm] = useState({
     title: '',
     date: '',
-    color: 'blue' as EventColor,
+    subject: 'Methods' as QCESubject,
     description: '',
   })
 
@@ -34,7 +32,7 @@ export default function AdminCalendarPage() {
     if (!form.title || !form.date) return
     await addCalendarEvent(form)
     await loadEvents()
-    setForm({ title: '', date: '', color: 'blue', description: '' })
+    setForm({ title: '', date: '', subject: 'Methods', description: '' })
     setIsAdding(false)
   }
 
@@ -72,7 +70,7 @@ export default function AdminCalendarPage() {
                 type="text"
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
-                placeholder="Title (e.g. Unit 3 Differentiation)"
+                placeholder="Title (e.g. Differentiation Techniques)"
                 className="w-full rounded-lg border-0 bg-secondary/50 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 required
               />
@@ -88,28 +86,27 @@ export default function AdminCalendarPage() {
               type="text"
               value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
-              placeholder="Description (optional)"
+              placeholder="What's being covered (e.g. Chain rule, product rule, optimisation problems)"
               className="w-full rounded-lg border-0 bg-secondary/50 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
-            {/* Color picker */}
+            {/* Subject picker */}
             <div>
-              <p className="mb-2 text-xs font-medium text-muted-foreground">Colour</p>
-              <div className="flex gap-2">
-                {COLOR_KEYS.map(key => (
+              <p className="mb-2 text-xs font-medium text-muted-foreground">Subject</p>
+              <div className="flex flex-wrap gap-2">
+                {QCE_SUBJECTS.map(s => (
                   <button
-                    key={key}
+                    key={s}
                     type="button"
-                    onClick={() => setForm({ ...form, color: key })}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full transition-transform hover:scale-110 ${
-                      form.color === key ? 'ring-2 ring-offset-2 ring-foreground/40' : ''
-                    }`}
-                    style={{ backgroundColor: EVENT_COLORS[key].bg }}
-                    title={EVENT_COLORS[key].label}
+                    onClick={() => setForm({ ...form, subject: s })}
+                    className="rounded-full px-3 py-1 text-xs font-medium transition-all duration-150"
+                    style={{
+                      backgroundColor: form.subject === s ? SUBJECT_COLORS[s].bg : '#f1f5f9',
+                      color: form.subject === s ? SUBJECT_COLORS[s].text : '#94a3b8',
+                      outline: form.subject === s ? `2px solid ${SUBJECT_COLORS[s].text}` : 'none',
+                      outlineOffset: '2px',
+                    }}
                   >
-                    <span
-                      className="h-3.5 w-3.5 rounded-full"
-                      style={{ backgroundColor: EVENT_COLORS[key].text }}
-                    />
+                    {s}
                   </button>
                 ))}
               </div>
@@ -154,7 +151,7 @@ export default function AdminCalendarPage() {
                 <div className="flex items-center gap-3 min-w-0">
                   <div
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: EVENT_COLORS[event.color].text }}
+                    style={{ backgroundColor: SUBJECT_COLORS[event.subject].text }}
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -162,16 +159,16 @@ export default function AdminCalendarPage() {
                       <span
                         className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
                         style={{
-                          backgroundColor: EVENT_COLORS[event.color].bg,
-                          color: EVENT_COLORS[event.color].text,
+                          backgroundColor: SUBJECT_COLORS[event.subject].bg,
+                          color: SUBJECT_COLORS[event.subject].text,
                         }}
                       >
-                        {EVENT_COLORS[event.color].label}
+                        {event.subject}
                       </span>
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {new Date(event.date + 'T00:00:00').toLocaleDateString('en-AU', {
-                        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+                        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
                       })}
                       {event.description && ` — ${event.description}`}
                     </p>

@@ -244,7 +244,7 @@ export async function removeEmailSubscriber(email: string): Promise<{ success: b
 //   created_at timestamp with time zone default now()
 // );
 
-import type { CalendarEvent, EventColor } from './types'
+import type { CalendarEvent, QCESubject } from './types'
 
 export async function getCalendarEvents(): Promise<CalendarEvent[]> {
   const { data, error } = await supabase
@@ -261,7 +261,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
     id: e.id,
     title: e.title,
     date: e.date,
-    color: e.color as EventColor,
+    subject: e.color as QCESubject,
     description: e.description,
     createdAt: e.created_at
   })) || []
@@ -273,7 +273,7 @@ export async function addCalendarEvent(event: Omit<CalendarEvent, 'id' | 'create
     .insert({
       title: event.title,
       date: event.date,
-      color: event.color,
+      color: event.subject,
       description: event.description
     })
     .select()
@@ -288,7 +288,7 @@ export async function addCalendarEvent(event: Omit<CalendarEvent, 'id' | 'create
     id: data.id,
     title: data.title,
     date: data.date,
-    color: data.color as EventColor,
+    subject: data.color as QCESubject,
     description: data.description,
     createdAt: data.created_at
   }

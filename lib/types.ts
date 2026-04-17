@@ -161,18 +161,17 @@ export interface CalendarEvent {
   id: string
   title: string
   date: string // YYYY-MM-DD
-  color: EventColor
+  subject: QCESubject
   description: string
   createdAt: string
 }
 
-export const EVENT_COLORS = {
-  blue:   { label: 'Blue',   bg: '#dbeafe', text: '#1d4ed8' },
-  purple: { label: 'Purple', bg: '#f3e8ff', text: '#7e22ce' },
-  green:  { label: 'Green',  bg: '#dcfce7', text: '#15803d' },
-  orange: { label: 'Orange', bg: '#ffedd5', text: '#c2410c' },
-  red:    { label: 'Red',    bg: '#fee2e2', text: '#b91c1c' },
-  pink:   { label: 'Pink',   bg: '#fce7f3', text: '#be185d' },
-} as const
+export const QCE_SUBJECTS = ['Methods', 'Specialist', 'Physics', 'Chemistry'] as const
+export type QCESubject = typeof QCE_SUBJECTS[number]
 
-export type EventColor = keyof typeof EVENT_COLORS
+export const SUBJECT_COLORS: Record<QCESubject, { bg: string; text: string; shade: string }> = {
+  Methods:   { bg: '#dbeafe', text: '#1d4ed8', shade: '#eff6ff' },
+  Specialist: { bg: '#f3e8ff', text: '#7e22ce', shade: '#faf5ff' },
+  Physics:   { bg: '#ffedd5', text: '#c2410c', shade: '#fff7ed' },
+  Chemistry: { bg: '#dcfce7', text: '#15803d', shade: '#f0fdf4' },
+}

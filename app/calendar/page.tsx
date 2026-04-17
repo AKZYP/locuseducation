@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { getCalendarEvents } from '@/lib/supabase-store'
-import { EVENT_COLORS } from '@/lib/types'
-import type { CalendarEvent } from '@/lib/types'
+import { SUBJECT_COLORS, QCE_SUBJECTS } from '@/lib/types'
+import type { CalendarEvent, QCESubject } from '@/lib/types'
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = [
@@ -18,6 +18,7 @@ export default function CalendarPage() {
   const [month, setMonth] = useState(today.getMonth())
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
+  const [hidden, setHidden] = useState<Set<QCESubject>>(new Set())
 
   useEffect(() => {
     getCalendarEvents().then(data => {
@@ -25,6 +26,14 @@ export default function CalendarPage() {
       setLoading(false)
     })
   }, [])
+
+  const toggleSubject = (subject: QCESubject) => {
+    setHidden(prev => {
+      const next = new Set(prev)
+      next.has(subject) ? next.delete(subject) : next.add(subject)
+      return next
+    })
+  }
 
   const prevMonth = () => {
     if (month === 0) { setMonth(11); setYear(y => y - 1) }
@@ -45,6 +54,7 @@ export default function CalendarPage() {
 
   const eventsByDate: Record<string, CalendarEvent[]> = {}
   events.forEach(e => {
+    if (hidden.has(e.subject)) return
     if (!eventsByDate[e.date]) eventsByDate[e.date] = []
     eventsByDate[e.date].push(e)
   })
@@ -79,9 +89,7 @@ export default function CalendarPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h2 className="text-sm font-semibold text-foreground">
-              {MONTHS[month]} {year}
-            </h2>
+            <h2 className="text-sm font-semibold text-foreground">{MONTHS[month]} {year}</h2>
             <button
               onClick={nextMonth}
               className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -113,35 +121,42 @@ export default function CalendarPage() {
                 const isLastCol = (i + 1) % 7 === 0
                 const dateStr = day ? getDateStr(day) : null
                 const dayEvents = dateStr ? (eventsByDate[dateStr] || []) : []
+                const shadeColor = dayEvents.length > 0
+                  ? SUBJECT_COLORS[dayEvents[0].subject].shade
+                  : undefined
 
                 return (
                   <div
                     key={i}
-                    className={`min-h-[80px] p-1.5 ${!isLastRow ? 'border-b' : ''} ${!isLastCol ? 'border-r' : ''} border-border/30`}
+                    className={`p-1.5 ${!isLastRow ? 'border-b' : ''} ${!isLastCol ? 'border-r' : ''} border-border/30 transition-colors`}
+                    style={{ backgroundColor: shadeColor, minHeight: '88px' }}
                   >
                     {day && (
                       <>
                         <span
                           className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
-                            isToday(day)
-                              ? 'bg-foreground text-white'
-                              : 'text-muted-foreground'
+                            isToday(day) ? 'bg-foreground text-white' : 'text-muted-foreground'
                           }`}
                         >
                           {day}
                         </span>
-                        <div className="mt-1 space-y-0.5">
+                        <div className="mt-1 space-y-1">
                           {dayEvents.map(e => (
-                            <div
-                              key={e.id}
-                              title={e.description || e.title}
-                              style={{
-                                backgroundColor: EVENT_COLORS[e.color].bg,
-                                color: EVENT_COLORS[e.color].text,
-                              }}
-                              className="truncate rounded px-1.5 py-0.5 text-[10px] font-medium leading-snug"
-                            >
-                              {e.title}
+                            <div key={e.id}>
+                              <div
+                                className="truncate rounded px-1.5 py-0.5 text-[10px] font-medium leading-snug"
+                                style={{
+                                  backgroundColor: SUBJECT_COLORS[e.subject].bg,
+                                  color: SUBJECT_COLORS[e.subject].text,
+                                }}
+                              >
+                                {e.title}
+                              </div>
+                              {e.description && (
+                                <p className="mt-0.5 px-0.5 text-[9px] leading-snug text-muted-foreground line-clamp-2">
+                                  {e.description}
+                                </p>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -154,14 +169,31 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Legend */}
-        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-          {(Object.entries(EVENT_COLORS) as [string, { label: string; bg: string; text: string }][]).map(([key, val]) => (
-            <div key={key} className="flex items-center gap-1.5">
-              <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: val.text }} />
-              <span className="text-xs text-muted-foreground">{val.label}</span>
-            </div>
-          ))}
+        {/* Legend / subject filter */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {QCE_SUBJECTS.map(subject => {
+            const isVisible = !hidden.has(subject)
+            const colors = SUBJECT_COLORS[subject]
+            return (
+              <button
+                key={subject}
+                onClick={() => toggleSubject(subject)}
+                className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-150"
+                style={{
+                  backgroundColor: isVisible ? colors.bg : '#f1f5f9',
+                  color: isVisible ? colors.text : '#94a3b8',
+                  opacity: isVisible ? 1 : 0.6,
+                }}
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: isVisible ? colors.text : '#94a3b8' }}
+                />
+                {subject}
+              </button>
+            )
+          })}
+          <span className="self-center text-[11px] text-muted-foreground">click to hide</span>
         </div>
       </main>
     </div>
