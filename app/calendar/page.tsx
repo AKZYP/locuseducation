@@ -12,12 +12,11 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-// Recurring weekly schedule: day-of-week → subject
 const WEEKLY_SCHEDULE: Record<number, QCESubject> = {
-  1: 'Methods',    // Monday
-  2: 'Specialist', // Tuesday
-  3: 'Physics',    // Wednesday
-  4: 'Chemistry',  // Thursday
+  1: 'Methods',
+  2: 'Specialist',
+  3: 'Physics',
+  4: 'Chemistry',
 }
 
 function getRecurringEvents(year: number, month: number): CalendarEvent[] {
@@ -30,6 +29,66 @@ function getRecurringEvents(year: number, month: number): CalendarEvent[] {
     events.push({ id: `recurring-${date}`, title: subject, date, subject, description: '', createdAt: '' })
   }
   return events
+}
+
+function generateICS(hidden: Set<QCESubject>, adminEvents: CalendarEvent[]): string {
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Locus Education//Schedule//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Locus Education Schedule',
+    'X-WR-TIMEZONE:Australia/Brisbane',
+  ]
+
+  const today = new Date()
+  const end = new Date()
+  end.setFullYear(end.getFullYear() + 1)
+
+  // Build admin event lookup to allow overrides
+  const adminKeys = new Set(adminEvents.map(e => `${e.date}-${e.subject}`))
+  const adminByKey: Record<string, CalendarEvent> = {}
+  adminEvents.forEach(e => { adminByKey[`${e.date}-${e.subject}`] = e })
+
+  const cur = new Date(today)
+  while (cur <= end) {
+    const dow = cur.getDay()
+    const subject = WEEKLY_SCHEDULE[dow]
+    if (subject && !hidden.has(subject)) {
+      const y = cur.getFullYear()
+      const m = String(cur.getMonth() + 1).padStart(2, '0')
+      const d = String(cur.getDate()).padStart(2, '0')
+      const dateKey = `${y}-${m}-${d}`
+      const adminKey = `${dateKey}-${subject}`
+      const override = adminKeys.has(adminKey) ? adminByKey[adminKey] : null
+      const title = override?.title || subject
+      const desc = override?.description || `Free QCE ${subject} tutoring session at 5pm AEST.`
+
+      lines.push('BEGIN:VEVENT')
+      lines.push(`UID:locus-${subject.toLowerCase()}-${y}${m}${d}@locuseducation`)
+      lines.push(`DTSTART;TZID=Australia/Brisbane:${y}${m}${d}T170000`)
+      lines.push(`DTEND;TZID=Australia/Brisbane:${y}${m}${d}T180000`)
+      lines.push(`SUMMARY:${title} — Locus Education`)
+      lines.push(`DESCRIPTION:${desc}`)
+      lines.push('END:VEVENT')
+    }
+    cur.setDate(cur.getDate() + 1)
+  }
+
+  lines.push('END:VCALENDAR')
+  return lines.join('\r\n')
+}
+
+function downloadICS(hidden: Set<QCESubject>, adminEvents: CalendarEvent[]) {
+  const content = generateICS(hidden, adminEvents)
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'locus-education-schedule.ics'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 export default function CalendarPage() {
@@ -68,12 +127,9 @@ export default function CalendarPage() {
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7
-
   const getDateStr = (day: number) =>
     `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 
-  // Merge recurring base schedule with admin-added events.
-  // Admin event for same date+subject replaces the recurring placeholder.
   const recurring = getRecurringEvents(year, month).filter(e => !hidden.has(e.subject))
   const adminEvents = events.filter(e => !hidden.has(e.subject))
   const adminKeys = new Set(adminEvents.map(e => `${e.date}-${e.subject}`))
@@ -101,10 +157,12 @@ export default function CalendarPage() {
       <Navbar />
 
       <main className="mx-auto max-w-4xl px-4 pt-24 pb-16">
-        <header className="mb-6">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-primary">What&apos;s on</p>
-          <h1 className="text-2xl font-semibold text-foreground">Schedule</h1>
-          <p className="mt-1 text-[15px] text-muted-foreground">See what topics are being covered each week.</p>
+        <header className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-primary">What&apos;s on</p>
+            <h1 className="text-2xl font-semibold text-foreground">Schedule</h1>
+            <p className="mt-1 text-[15px] text-muted-foreground">Sessions run every week at 5:00 pm AEST.</p>
+          </div>
         </header>
 
         <div className="rounded-2xl border border-border/50 bg-white shadow-sm overflow-hidden">
@@ -158,7 +216,7 @@ export default function CalendarPage() {
                   <div
                     key={i}
                     className={`p-1.5 ${!isLastRow ? 'border-b' : ''} ${!isLastCol ? 'border-r' : ''} border-border/30 transition-colors`}
-                    style={{ backgroundColor: shadeColor, minHeight: '88px' }}
+                    style={{ backgroundColor: shadeColor, minHeight: '92px' }}
                   >
                     {day && (
                       <>
@@ -181,8 +239,11 @@ export default function CalendarPage() {
                               >
                                 {e.title}
                               </div>
+                              <p className="mt-0.5 px-0.5 text-[9px] leading-snug text-muted-foreground">
+                                5:00 pm
+                              </p>
                               {e.description && (
-                                <p className="mt-0.5 px-0.5 text-[9px] leading-snug text-muted-foreground line-clamp-2">
+                                <p className="px-0.5 text-[9px] leading-snug text-muted-foreground line-clamp-2">
                                   {e.description}
                                 </p>
                               )}
@@ -198,31 +259,43 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Legend / subject filter */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          {QCE_SUBJECTS.map(subject => {
-            const isVisible = !hidden.has(subject)
-            const colors = SUBJECT_COLORS[subject]
-            return (
-              <button
-                key={subject}
-                onClick={() => toggleSubject(subject)}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-150"
-                style={{
-                  backgroundColor: isVisible ? colors.bg : '#f1f5f9',
-                  color: isVisible ? colors.text : '#94a3b8',
-                  opacity: isVisible ? 1 : 0.6,
-                }}
-              >
-                <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: isVisible ? colors.text : '#94a3b8' }}
-                />
-                {subject}
-              </button>
-            )
-          })}
-          <span className="self-center text-[11px] text-muted-foreground">click to hide</span>
+        {/* Legend / filter + download */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2 items-center">
+            {QCE_SUBJECTS.map(subject => {
+              const isVisible = !hidden.has(subject)
+              const colors = SUBJECT_COLORS[subject]
+              return (
+                <button
+                  key={subject}
+                  onClick={() => toggleSubject(subject)}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-150"
+                  style={{
+                    backgroundColor: isVisible ? colors.bg : '#f1f5f9',
+                    color: isVisible ? colors.text : '#94a3b8',
+                    opacity: isVisible ? 1 : 0.6,
+                  }}
+                >
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: isVisible ? colors.text : '#94a3b8' }}
+                  />
+                  {subject}
+                </button>
+              )
+            })}
+            <span className="text-[11px] text-muted-foreground">click to hide</span>
+          </div>
+
+          <button
+            onClick={() => downloadICS(hidden, events)}
+            className="flex items-center gap-1.5 rounded-full border border-border/60 bg-white px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-all duration-150 hover:border-foreground/20 hover:text-foreground"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download .ics
+          </button>
         </div>
       </main>
     </div>
