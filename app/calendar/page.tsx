@@ -12,6 +12,26 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
+// Recurring weekly schedule: day-of-week → subject
+const WEEKLY_SCHEDULE: Record<number, QCESubject> = {
+  1: 'Methods',    // Monday
+  2: 'Specialist', // Tuesday
+  3: 'Physics',    // Wednesday
+  4: 'Chemistry',  // Thursday
+}
+
+function getRecurringEvents(year: number, month: number): CalendarEvent[] {
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const events: CalendarEvent[] = []
+  for (let day = 1; day <= daysInMonth; day++) {
+    const subject = WEEKLY_SCHEDULE[new Date(year, month, day).getDay()]
+    if (!subject) continue
+    const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    events.push({ id: `recurring-${date}`, title: subject, date, subject, description: '', createdAt: '' })
+  }
+  return events
+}
+
 export default function CalendarPage() {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
@@ -52,9 +72,18 @@ export default function CalendarPage() {
   const getDateStr = (day: number) =>
     `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 
+  // Merge recurring base schedule with admin-added events.
+  // Admin event for same date+subject replaces the recurring placeholder.
+  const recurring = getRecurringEvents(year, month).filter(e => !hidden.has(e.subject))
+  const adminEvents = events.filter(e => !hidden.has(e.subject))
+  const adminKeys = new Set(adminEvents.map(e => `${e.date}-${e.subject}`))
+  const merged = [
+    ...recurring.filter(e => !adminKeys.has(`${e.date}-${e.subject}`)),
+    ...adminEvents,
+  ]
+
   const eventsByDate: Record<string, CalendarEvent[]> = {}
-  events.forEach(e => {
-    if (hidden.has(e.subject)) return
+  merged.forEach(e => {
     if (!eventsByDate[e.date]) eventsByDate[e.date] = []
     eventsByDate[e.date].push(e)
   })
