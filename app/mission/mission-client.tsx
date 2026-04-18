@@ -93,6 +93,57 @@ export function MissionClient() {
           0%, 100% { transform: translate(0, 0) rotate(-0.5deg); opacity: 0.35; }
           50%      { transform: translate(10px, -8px) rotate(0.5deg); opacity: 0.55; }
         }
+        @keyframes equation-glow {
+          0%, 100% { text-shadow: 0 0 0 rgba(107, 127, 78, 0), 0 0 0 rgba(184, 86, 43, 0.1); }
+          50%      { text-shadow: 0 0 8px rgba(107, 127, 78, 0.4), 0 0 12px rgba(184, 86, 43, 0.15); }
+        }
+        @keyframes equation-slide-in-left {
+          0%   { opacity: 0; transform: translateX(-40px) scaleX(0.8); }
+          100% { opacity: 0.55; transform: translateX(0) scaleX(1); }
+        }
+        @keyframes equation-slide-in-right {
+          0%   { opacity: 0; transform: translateX(40px) scaleX(0.8); }
+          100% { opacity: 0.55; transform: translateX(0) scaleX(1); }
+        }
+        @keyframes typewriter {
+          0% {
+            width: 0;
+            visibility: hidden;
+          }
+          99% {
+            visibility: visible;
+          }
+          100% {
+            width: 100%;
+          }
+        }
+        @keyframes typewriter-blink {
+          0%, 49% {
+            border-right-color: var(--ink);
+          }
+          50%, 100% {
+            border-right-color: transparent;
+          }
+        }
+        .typewriter {
+          display: inline-block;
+          max-width: 100%;
+          overflow: hidden;
+          white-space: normal;
+          word-wrap: break-word;
+          word-break: break-word;
+          animation: typewriter 2.5s steps(60, end) forwards;
+        }
+        .typewriter-container {
+          position: relative;
+          display: inline;
+        }
+        .typewriter-container.with-cursor::after {
+          content: '';
+          position: absolute;
+          border-right: 2px solid var(--ink);
+          animation: typewriter-blink 0.7s step-end infinite;
+        }
         .intro-overlay {
           position: fixed;
           inset: 0;
@@ -128,12 +179,20 @@ export function MissionClient() {
           font-family: var(--font-serif), Georgia, serif;
           font-style: italic;
           color: var(--ink-muted);
-          font-size: 15px;
+          font-size: 16px;
+          font-weight: 500;
           opacity: 0.35;
           pointer-events: none;
           user-select: none;
           white-space: nowrap;
-          animation: float-drift 14s ease-in-out infinite;
+          animation: float-drift 14s ease-in-out infinite, equation-glow 4s ease-in-out infinite;
+          will-change: transform;
+        }
+        .floating-eq.from-left {
+          animation: equation-slide-in-left 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards, float-drift 14s ease-in-out 1.2s infinite, equation-glow 4s ease-in-out infinite;
+        }
+        .floating-eq.from-right {
+          animation: equation-slide-in-right 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards, float-drift 14s ease-in-out 1.2s infinite, equation-glow 4s ease-in-out infinite;
         }
 
         .doodle {
@@ -170,8 +229,8 @@ export function MissionClient() {
           {SIDE_EQUATIONS_LEFT.map((eq, i) => (
             <span
               key={`l-${i}`}
-              className="floating-eq"
-              style={{ top: eq.top, left: '3%', animationDelay: `${i * 1.4}s` }}
+              className="floating-eq from-left"
+              style={{ top: eq.top, left: '3%', animationDelay: `${i * 1.4}s, 0s, ${i * 0.8}s` }}
             >
               {eq.text}
             </span>
@@ -179,8 +238,8 @@ export function MissionClient() {
           {SIDE_EQUATIONS_RIGHT.map((eq, i) => (
             <span
               key={`r-${i}`}
-              className="floating-eq"
-              style={{ top: eq.top, right: '3%', animationDelay: `${i * 1.8}s` }}
+              className="floating-eq from-right"
+              style={{ top: eq.top, right: '3%', animationDelay: `${i * 1.8}s, 0s, ${i * 0.9}s` }}
             >
               {eq.text}
             </span>
@@ -228,8 +287,10 @@ export function MissionClient() {
                 lineHeight: 1.05,
               }}
             >
-              Education shouldn&apos;t be a{' '}
-              <span className="serif-italic olive">pay-to-win</span> system.
+              <span className="typewriter">
+                Education shouldn&apos;t be a{' '}
+                <span className="serif-italic olive">pay-to-win</span> system.
+              </span>
             </h1>
           </div>
         )}
@@ -246,9 +307,11 @@ export function MissionClient() {
               </p>
             </div>
             <h1 className="serif text-5xl md:text-7xl ink leading-[1.05]">
-              Education shouldn&apos;t be a{' '}
-              <span className="serif-italic olive accent-underline">pay-to-win</span>{' '}
-              system.
+              <span className="typewriter" style={{ animationDuration: '2s', animationDelay: '0.3s' }}>
+                Education shouldn&apos;t be a{' '}
+                <span className="serif-italic olive accent-underline">pay-to-win</span>{' '}
+                system.
+              </span>
             </h1>
             <p className="serif-italic text-xl md:text-2xl ink-soft leading-relaxed max-w-2xl">
               But right now, it is. And I&apos;ve lived both sides of it.
@@ -269,29 +332,25 @@ export function MissionClient() {
 
               <div className="space-y-6 text-[17px] ink-soft leading-[1.8]">
                 <p className="first-letter:serif first-letter:text-5xl first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:leading-none first-letter:ink">
-                  Growing up, I watched my classmates walk into school with something I
-                  didn&apos;t have — <span className="serif-italic ink">a tutor</span>.
+                  I know the <span className="serif-italic ink">value</span> of good tutoring. I&apos;ve been on both sides of it.
                 </p>
                 <p>
-                  Every Monday they&apos;d come in with worked solutions, practice papers,
-                  and answers I was still struggling to figure out on my own. Not because
-                  they were smarter. Not because they worked harder.
+                  Growing up, a tutor helped me understand Maths in ways that finally clicked. They explained concepts properly, broke down hard problems step by step, and made studying feel possible instead of hopeless. My grades changed. My confidence changed. I saw what good teaching actually does.
                 </p>
                 <p className="serif text-2xl md:text-3xl ink leading-snug py-2">
-                  Because their parents could afford $100 an hour. Mine couldn&apos;t.
+                  That tutor charged $80 an hour. For many families, even that is out of reach.
                 </p>
                 <p>
-                  I remember asking my mum once. I remember the look on her face when she
-                  had to say no. I never asked again.
+                  After I graduated, I started tutoring other students. And I charged $70 to $100 an hour. It felt easy. The money was good. I was technically helping people, right?
                 </p>
                 <p>
-                  So I did what kids in my position do — I taught myself. Late nights.
-                  YouTube rabbit holes. PDFs bookmarked at 2am. Sometimes I caught up.
-                  Sometimes I didn&apos;t. And every time report cards came around,
-                  I&apos;d see the same gap between me and the kids who had help.
+                  But here&apos;s what I didn&apos;t think about then: the 16-year-old who can&apos;t ask their parents for another $80 session. The brilliant student sitting in class struggling alone because their family just can&apos;t afford help, even though they need it more than anyone.
+                </p>
+                <p>
+                  And I noticed something else. A lot of tutors out there aren&apos;t resourceful. They&apos;re teaching outdated syllabus content. They&apos;re unprofessional. And they&apos;re still charging $70-100 an hour. No wonder students feel ripped off. No wonder access to <span className="serif-italic">good</span> tutoring stays locked behind a paywall.
                 </p>
                 <p className="serif-italic text-xl ink">
-                  It wasn&apos;t fair then. It isn&apos;t fair now.
+                  So I&apos;m doing this differently.
                 </p>
               </div>
             </section>
