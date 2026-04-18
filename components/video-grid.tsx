@@ -53,12 +53,6 @@ export function VideoGrid({ subject: selectedSubject }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Subject Tagline */}
-      <p className="text-xs text-muted-foreground">
-        {selectedSubject === 'Methods' && 'Watch. Rewatch. Ace it.'}
-        {selectedSubject === 'Specialist' && 'Specialist dropping soon. Sit tight.'}
-      </p>
-
       {/* Search and Filter Row */}
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="relative flex-1">
