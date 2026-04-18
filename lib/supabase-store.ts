@@ -324,6 +324,31 @@ export async function setSiteShutdown(active: boolean): Promise<void> {
     .upsert({ key: 'shutdown', value: String(active) })
 }
 
+// Page visibility toggles
+const PAGE_DEFAULTS: Record<string, boolean> = {
+  videos: true, resources: true, tutors: true, calendar: true, mission: true,
+}
+
+export async function getPageStatuses(): Promise<Record<string, boolean>> {
+  const { data } = await supabase
+    .from('site_config')
+    .select('key, value')
+    .like('key', 'page_%')
+
+  const result = { ...PAGE_DEFAULTS }
+  data?.forEach(row => {
+    const page = row.key.replace('page_', '')
+    result[page] = row.value === 'true'
+  })
+  return result
+}
+
+export async function setPageStatus(page: string, active: boolean): Promise<void> {
+  await supabase
+    .from('site_config')
+    .upsert({ key: `page_${page}`, value: String(active) })
+}
+
 // Schedule subject toggles
 const SUBJECT_DEFAULTS: Record<string, boolean> = {
   Methods: true,

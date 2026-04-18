@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/navbar'
+import { PageGate } from '@/components/page-gate'
 
 const SUBJECT_STYLES: Record<string, { bg: string; text: string }> = {
   'Methods':   { bg: '#dbeafe', text: '#1d4ed8' },
@@ -66,6 +67,7 @@ const TUTORS = [
 
 export default function TutorsPage() {
   return (
+    <PageGate page="tutors">
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -119,5 +121,6 @@ export default function TutorsPage() {
         </div>
       </main>
     </div>
+    </PageGate>
   )
 }

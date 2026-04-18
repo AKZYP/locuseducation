@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { Navbar } from '@/components/navbar'
+import { PageGate } from '@/components/page-gate'
 import { getResources } from '@/lib/store'
 import { TOPICS, SUBJECTS } from '@/lib/types'
 import type { Resource, Topic, Subject } from '@/lib/types'
@@ -28,9 +29,10 @@ export default function ResourcesPage() {
   }, [resources, search, selectedTopic, selectedSubject])
 
   return (
+    <PageGate page="resources">
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="mx-auto max-w-5xl px-4 pt-24 pb-16">
         <div className="space-y-5">
           {/* Subject Tabs */}
@@ -181,5 +183,6 @@ export default function ResourcesPage() {
         </div>
       </main>
     </div>
+    </PageGate>
   )
 }

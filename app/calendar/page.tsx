@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { getCalendarEvents, getScheduleSubjects } from '@/lib/supabase-store'
+import { PageGate } from '@/components/page-gate'
 import { SUBJECT_COLORS, QCE_SUBJECTS } from '@/lib/types'
 import type { CalendarEvent, QCESubject } from '@/lib/types'
 
@@ -157,6 +158,7 @@ export default function CalendarPage() {
     day === today.getDate() && month === today.getMonth() && year === today.getFullYear()
 
   return (
+    <PageGate page="calendar">
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -303,5 +305,6 @@ export default function CalendarPage() {
         </div>
       </main>
     </div>
+    </PageGate>
   )
 }

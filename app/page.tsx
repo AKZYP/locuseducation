@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Navbar } from '@/components/navbar'
+import { PageGate } from '@/components/page-gate'
 import { LiveCountdown } from '@/components/live-countdown'
 import { VideoGrid } from '@/components/video-grid'
 import { MottoText } from '@/components/motto-text'
@@ -12,6 +13,7 @@ export default function Home() {
   const [selectedSubject, setSelectedSubject] = useState<Subject>('Methods')
 
   return (
+    <PageGate page="videos">
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -51,5 +53,6 @@ export default function Home() {
         <VideoGrid subject={selectedSubject} />
       </main>
     </div>
+    </PageGate>
   )
 }

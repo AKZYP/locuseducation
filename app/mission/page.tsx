@@ -1,7 +1,9 @@
 import { Navbar } from '@/components/navbar'
+import { PageGate } from '@/components/page-gate'
 
 export default function MissionPage() {
   return (
+    <PageGate page="mission">
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -80,5 +82,6 @@ export default function MissionPage() {
         </article>
       </main>
     </div>
+    </PageGate>
   )
 }
