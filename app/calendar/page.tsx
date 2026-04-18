@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
-import { getCalendarEvents } from '@/lib/supabase-store'
+import { getCalendarEvents, getScheduleSubjects } from '@/lib/supabase-store'
 import { SUBJECT_COLORS, QCE_SUBJECTS } from '@/lib/types'
 import type { CalendarEvent, QCESubject } from '@/lib/types'
 
@@ -12,19 +12,19 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-const WEEKLY_SCHEDULE: Record<number, QCESubject> = {
+const BASE_SCHEDULE: Record<number, QCESubject> = {
   1: 'Methods',
   2: 'Specialist',
-  // 3: 'Physics',   — not yet active
-  // 4: 'Chemistry', — not yet active
+  3: 'Physics',
+  4: 'Chemistry',
 }
 
-function getRecurringEvents(year: number, month: number): CalendarEvent[] {
+function getRecurringEvents(year: number, month: number, activeSubjects: Record<string, boolean>): CalendarEvent[] {
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const events: CalendarEvent[] = []
   for (let day = 1; day <= daysInMonth; day++) {
-    const subject = WEEKLY_SCHEDULE[new Date(year, month, day).getDay()]
-    if (!subject) continue
+    const subject = BASE_SCHEDULE[new Date(year, month, day).getDay()]
+    if (!subject || !activeSubjects[subject]) continue
     const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     events.push({ id: `recurring-${date}`, title: subject, date, subject, description: '', createdAt: '' })
   }
@@ -98,10 +98,14 @@ export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [hidden, setHidden] = useState<Set<QCESubject>>(new Set())
+  const [activeSubjects, setActiveSubjects] = useState<Record<string, boolean>>({
+    Methods: true, Specialist: true, Physics: false, Chemistry: false,
+  })
 
   useEffect(() => {
-    getCalendarEvents().then(data => {
-      setEvents(data)
+    Promise.all([getCalendarEvents(), getScheduleSubjects()]).then(([evts, active]) => {
+      setEvents(evts)
+      setActiveSubjects(active)
       setLoading(false)
     })
   }, [])
@@ -130,7 +134,7 @@ export default function CalendarPage() {
   const getDateStr = (day: number) =>
     `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 
-  const recurring = getRecurringEvents(year, month).filter(e => !hidden.has(e.subject))
+  const recurring = getRecurringEvents(year, month, activeSubjects).filter(e => !hidden.has(e.subject))
   const adminEvents = events.filter(e => !hidden.has(e.subject))
   const adminKeys = new Set(adminEvents.map(e => `${e.date}-${e.subject}`))
   const merged = [

@@ -324,6 +324,34 @@ export async function setSiteShutdown(active: boolean): Promise<void> {
     .upsert({ key: 'shutdown', value: String(active) })
 }
 
+// Schedule subject toggles
+const SUBJECT_DEFAULTS: Record<string, boolean> = {
+  Methods: true,
+  Specialist: true,
+  Physics: false,
+  Chemistry: false,
+}
+
+export async function getScheduleSubjects(): Promise<Record<string, boolean>> {
+  const { data } = await supabase
+    .from('site_config')
+    .select('key, value')
+    .like('key', 'schedule_%')
+
+  const result = { ...SUBJECT_DEFAULTS }
+  data?.forEach(row => {
+    const subject = row.key.replace('schedule_', '')
+    result[subject] = row.value === 'true'
+  })
+  return result
+}
+
+export async function setScheduleSubject(subject: string, active: boolean): Promise<void> {
+  await supabase
+    .from('site_config')
+    .upsert({ key: `schedule_${subject}`, value: String(active) })
+}
+
 export function extractYouTubeId(url: string): string | null {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)

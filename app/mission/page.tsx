@@ -4,13 +4,13 @@ export default function MissionPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="mx-auto max-w-2xl px-4 pt-24 pb-16">
         <article className="space-y-8">
           <header>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-primary">Our Mission</p>
+            <p className="mb-2 text-xs font-large uppercase tracking-wider text-primary">Our Mission</p>
             <h1 className="text-2xl font-semibold text-foreground leading-tight">
-              Quality education shouldn&apos;t cost $100 an hour
+              Education shouldn&apos;t be a pay-to-win system.
             </h1>
           </header>
 
@@ -29,8 +29,8 @@ export default function MissionPage() {
 
           <section className="space-y-4 text-[15px] text-muted-foreground leading-relaxed">
             <p>
-              Private tutoring for QCE Maths Methods costs $60 to $150 per hour. For many students, 
-              quality guidance is out of reach. Those who can afford it get ahead. Those who 
+              Private tutoring for QCE Maths Methods costs $60 to $150 per hour. For many students,
+              quality guidance is out of reach. Those who can afford it get ahead. Those who
               can&apos;t are left behind.
             </p>
             <p>
@@ -61,8 +61,8 @@ export default function MissionPage() {
               No sign-ups. No paywalls. No premium tiers. No &quot;free trial&quot; that expires.
             </p>
             <p>
-              If you have knowledge that can help others, charging for it when you don&apos;t 
-              need to creates unnecessary barriers. The goal is simple: help as many students 
+              If you have knowledge that can help others, charging for it when you don&apos;t
+              need to creates unnecessary barriers. The goal is simple: help as many students
               succeed as possible.
             </p>
           </section>

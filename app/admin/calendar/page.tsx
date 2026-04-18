@@ -1,14 +1,25 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getCalendarEvents, addCalendarEvent, deleteCalendarEvent } from '@/lib/supabase-store'
+import { getCalendarEvents, addCalendarEvent, deleteCalendarEvent, getScheduleSubjects, setScheduleSubject } from '@/lib/supabase-store'
 import { SUBJECT_COLORS, QCE_SUBJECTS } from '@/lib/types'
 import type { CalendarEvent, QCESubject } from '@/lib/types'
+
+const DAY_LABEL: Record<QCESubject, string> = {
+  Methods: 'Monday',
+  Specialist: 'Tuesday',
+  Physics: 'Wednesday',
+  Chemistry: 'Thursday',
+}
 
 export default function AdminCalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [isAdding, setIsAdding] = useState(false)
+  const [activeSubjects, setActiveSubjects] = useState<Record<string, boolean>>({
+    Methods: true, Specialist: true, Physics: false, Chemistry: false,
+  })
+  const [togglingSubject, setTogglingSubject] = useState<QCESubject | null>(null)
   const [form, setForm] = useState({
     title: '',
     date: '',
@@ -17,8 +28,16 @@ export default function AdminCalendarPage() {
   })
 
   useEffect(() => {
-    loadEvents()
+    Promise.all([loadEvents(), getScheduleSubjects().then(setActiveSubjects)])
   }, [])
+
+  const handleSubjectToggle = async (subject: QCESubject) => {
+    setTogglingSubject(subject)
+    const next = !activeSubjects[subject]
+    await setScheduleSubject(subject, next)
+    setActiveSubjects(prev => ({ ...prev, [subject]: next }))
+    setTogglingSubject(null)
+  }
 
   const loadEvents = async () => {
     setLoading(true)
@@ -45,6 +64,59 @@ export default function AdminCalendarPage() {
 
   return (
     <div>
+      {/* Weekly subject toggles */}
+      <div className="mb-6 rounded-xl bg-white shadow-sm ring-1 ring-border/50 p-5">
+        <h2 className="mb-1 text-sm font-semibold text-foreground">Weekly Schedule</h2>
+        <p className="mb-4 text-xs text-muted-foreground">Toggle subjects on or off — changes apply to the public calendar immediately.</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {QCE_SUBJECTS.map(subject => {
+            const isActive = !!activeSubjects[subject]
+            const colors = SUBJECT_COLORS[subject]
+            const isToggling = togglingSubject === subject
+            return (
+              <button
+                key={subject}
+                onClick={() => handleSubjectToggle(subject)}
+                disabled={isToggling}
+                className="flex flex-col gap-2 rounded-xl border-2 p-3 text-left transition-all duration-200"
+                style={{
+                  borderColor: isActive ? colors.text + '40' : '#e2e8f0',
+                  backgroundColor: isActive ? colors.shade : '#f8fafc',
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className="text-xs font-semibold"
+                    style={{ color: isActive ? colors.text : '#94a3b8' }}
+                  >
+                    {subject}
+                  </span>
+                  {/* Toggle pill */}
+                  <div
+                    className="relative h-4 w-7 rounded-full transition-colors duration-200"
+                    style={{ backgroundColor: isActive ? colors.text : '#cbd5e1' }}
+                  >
+                    <div
+                      className="absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition-transform duration-200"
+                      style={{ transform: isActive ? 'translateX(14px)' : 'translateX(2px)' }}
+                    />
+                  </div>
+                </div>
+                <span className="text-[10px] text-muted-foreground">
+                  {DAY_LABEL[subject]} · 5:00 pm
+                </span>
+                <span
+                  className="text-[10px] font-medium"
+                  style={{ color: isActive ? colors.text : '#94a3b8' }}
+                >
+                  {isToggling ? 'Saving...' : isActive ? 'Active' : 'Off'}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-foreground">Schedule</h1>
