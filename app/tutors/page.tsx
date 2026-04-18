@@ -80,6 +80,15 @@ export default function TutorsPage() {
           </p>
         </header>
 
+        <div className="mb-6">
+          <a
+            href="/contact"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            Interested in becoming a tutor?
+          </a>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {TUTORS.map((tutor, i) => (
             <div key={i} className="rounded-2xl border border-border/50 bg-white p-5 shadow-sm flex flex-col">
