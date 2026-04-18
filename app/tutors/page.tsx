@@ -76,7 +76,7 @@ export default function TutorsPage() {
           <p className="mb-2 text-xs font-medium uppercase tracking-wider text-primary">Meet the team</p>
           <h1 className="text-2xl font-semibold text-foreground leading-tight">Our Tutors</h1>
           <p className="mt-2 text-[15px] text-muted-foreground">
-            University students volunteering their time to deliver free QCE tutoring in Maths, Physics, and Chemistry.
+            University students volunteering their time to deliver free QCE tutoring.
           </p>
         </header>
 

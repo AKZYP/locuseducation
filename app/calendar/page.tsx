@@ -64,7 +64,7 @@ function generateICS(hidden: Set<QCESubject>, adminEvents: CalendarEvent[]): str
       const adminKey = `${dateKey}-${subject}`
       const override = adminKeys.has(adminKey) ? adminByKey[adminKey] : null
       const title = override?.title || subject
-      const desc = override?.description || `Free QCE ${subject} tutoring session at 5pm AEST.`
+      const desc = override?.description || `Free QCE tutoring — ${subject} session at 5pm AEST.`
 
       lines.push('BEGIN:VEVENT')
       lines.push(`UID:locus-${subject.toLowerCase()}-${y}${m}${d}@locuseducation`)

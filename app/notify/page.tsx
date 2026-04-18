@@ -5,14 +5,14 @@ const portals = [
   {
     subject: 'Methods',
     slug: 'methods',
-    description: 'QCE Maths Methods',
+    description: 'QCE Tutoring',
     color: 'bg-blue-50',
     dot: 'bg-blue-500',
   },
   {
     subject: 'Specialist',
     slug: 'specialist',
-    description: 'QCE Specialist Maths',
+    description: 'QCE Tutoring',
     color: 'bg-purple-50',
     dot: 'bg-purple-500',
   },

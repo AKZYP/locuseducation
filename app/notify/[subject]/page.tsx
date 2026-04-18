@@ -16,8 +16,8 @@ const SUBJECT_LABELS: Record<string, string> = {
 }
 
 const SUBJECT_DESC: Record<string, string> = {
-  methods:    'QCE Maths Methods — functions, calculus, stats, and more.',
-  specialist: 'QCE Specialist Maths — vectors, complex numbers, mechanics.',
+  methods:    'Free QCE tutoring — weekly live sessions, recordings, and resources.',
+  specialist: 'Free QCE tutoring — weekly live sessions, recordings, and resources.',
 }
 
 export default function SubjectNotifyPage() {
