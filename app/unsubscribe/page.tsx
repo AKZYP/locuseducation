@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Navbar } from '@/components/navbar'
-import { removeEmailSubscriber } from '@/lib/supabase-store'
 
 export default function UnsubscribePage() {
   const [email, setEmail] = useState('')
@@ -11,8 +10,18 @@ export default function UnsubscribePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setStatus('loading')
-    const result = await removeEmailSubscriber(email)
-    setStatus(result.notFound ? 'notfound' : result.success ? 'success' : 'error')
+    try {
+      const res = await fetch('/api/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setStatus('error'); return }
+      setStatus(data.notFound ? 'notfound' : 'success')
+    } catch {
+      setStatus('error')
+    }
   }
 
   return (

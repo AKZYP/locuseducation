@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
-import { addEmailSubscriber } from '@/lib/supabase-store'
 
 // ── WhatsApp invite links per subject ───────────────────────────────────────
 const WHATSAPP_LINKS: Record<string, string> = {
@@ -47,8 +46,19 @@ export default function SubjectNotifyPage() {
     e.preventDefault()
     if (!agreed) return
     setStatus('loading')
-    const result = await addEmailSubscriber(email, label)
-    setStatus(result.alreadyExists ? 'exists' : result.success ? 'success' : 'error')
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, subject: label }),
+      })
+      const data = await res.json()
+      if (res.status === 429) { setStatus('error'); return }
+      if (!res.ok) { setStatus('error'); return }
+      setStatus(data.alreadyExists ? 'exists' : 'success')
+    } catch {
+      setStatus('error')
+    }
   }
 
   return (
