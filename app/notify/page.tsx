@@ -5,14 +5,14 @@ const portals = [
   {
     subject: 'Methods',
     slug: 'methods',
-    description: 'QCE Maths Methods — functions, calculus, stats, and more.',
+    description: 'QCE Maths Methods',
     color: 'bg-blue-50',
     dot: 'bg-blue-500',
   },
   {
     subject: 'Specialist',
     slug: 'specialist',
-    description: 'QCE Specialist Maths — vectors, complex numbers, mechanics.',
+    description: 'QCE Specialist Maths',
     color: 'bg-purple-50',
     dot: 'bg-purple-500',
   },
@@ -32,7 +32,7 @@ export default function NotifyPage() {
               Stay in the loop
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Pick the subject you want notifications for — or sign up for both.
+              Pick the subject you want notifications for.
             </p>
           </header>
 
