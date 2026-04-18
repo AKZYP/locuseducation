@@ -7,11 +7,12 @@ import { getPageStatuses, setPageStatus } from '@/lib/supabase-store'
 const SUPER_ADMIN = 'rishpatelau@gmail.com'
 
 const PAGES = [
-  { key: 'videos',    label: 'Videos',     path: '/',          description: 'Main video library and livestreams' },
-  { key: 'resources', label: 'Resources',  path: '/resources', description: 'Downloadable study guides and resources' },
-  { key: 'tutors',    label: 'Tutors',     path: '/tutors',    description: 'Meet the tutor profiles' },
-  { key: 'calendar',  label: 'Calendar',   path: '/calendar',  description: 'Weekly session schedule' },
-  { key: 'mission',   label: 'Our Mission',path: '/mission',   description: 'About Locus and our goals' },
+  { key: 'videos',    label: 'Videos',       path: '/',          description: 'Main video library and livestreams' },
+  { key: 'resources', label: 'Resources',    path: '/resources', description: 'Downloadable study guides and resources' },
+  { key: 'tutors',    label: 'Tutors',       path: '/tutors',    description: 'Meet the tutor profiles' },
+  { key: 'calendar',  label: 'Calendar',     path: '/calendar',  description: 'Weekly session schedule' },
+  { key: 'notify',    label: 'Get Notified', path: '/notify',    description: 'Email notification sign-up' },
+  { key: 'mission',   label: 'Our Mission',  path: '/mission',   description: 'About Locus and our goals' },
 ]
 
 export default function AdminPagesPage() {

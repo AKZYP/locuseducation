@@ -13,6 +13,7 @@ export function Navbar() {
     { href: '/resources', label: 'Resources' },
     { href: '/tutors', label: 'Tutors' },
     { href: '/calendar', label: 'Calendar' },
+    { href: '/notify', label: 'Get Notified' },
     { href: '/mission', label: 'Our Mission' },
   ]
 

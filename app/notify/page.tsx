@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/navbar'
+import { PageGate } from '@/components/page-gate'
 
 const portals = [
   {
@@ -19,6 +20,7 @@ const portals = [
 
 export default function NotifyPage() {
   return (
+    <PageGate page="notify">
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -59,5 +61,6 @@ export default function NotifyPage() {
         </div>
       </main>
     </div>
+    </PageGate>
   )
 }
