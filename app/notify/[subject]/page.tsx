@@ -6,8 +6,8 @@ import { Navbar } from '@/components/navbar'
 
 // ── WhatsApp invite links per subject ───────────────────────────────────────
 const WHATSAPP_LINKS: Record<string, string> = {
-  methods:    'https://chat.whatsapp.com/REPLACE_METHODS',
-  specialist: 'https://chat.whatsapp.com/REPLACE_SPECIALIST',
+  methods:    'https://chat.whatsapp.com/GJE035OgSam3V4WZeEruNE?mode=gi_t',
+  specialist: 'https://chat.whatsapp.com/EMVjIzFF7JrJsqOQZpaOzQ?mode=gi_t',
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
