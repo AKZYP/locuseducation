@@ -171,6 +171,47 @@ export default function CalendarPage() {
           </div>
         </header>
 
+        {/* Legend */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2 items-center">
+            {QCE_SUBJECTS.map(subject => {
+              const isComingSoon = subject === 'Physics' || subject === 'Chemistry'
+              const isVisible = !hidden.has(subject)
+              const colors = SUBJECT_COLORS[subject]
+              return (
+                <button
+                  key={subject}
+                  onClick={() => !isComingSoon && toggleSubject(subject)}
+                  disabled={isComingSoon}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: isComingSoon ? '#f1f5f9' : isVisible ? colors.bg : '#f1f5f9',
+                    color: isComingSoon ? '#94a3b8' : isVisible ? colors.text : '#94a3b8',
+                    opacity: isComingSoon ? 0.5 : isVisible ? 1 : 0.6,
+                  }}
+                >
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: isComingSoon ? '#94a3b8' : isVisible ? colors.text : '#94a3b8' }}
+                  />
+                  {subject}
+                  {isComingSoon && <span className="ml-0.5 text-[10px]">· soon</span>}
+                </button>
+              )
+            })}
+          </div>
+
+          <button
+            onClick={() => downloadICS(hidden, events)}
+            className="flex items-center gap-1.5 rounded-full border border-border/60 bg-white px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-all duration-150 hover:border-foreground/20 hover:text-foreground"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download .ics
+          </button>
+        </div>
+
         <div className="rounded-2xl border border-border/50 bg-white shadow-sm overflow-hidden">
           {/* Month nav */}
           <div className="flex items-center justify-between border-b border-border/50 px-5 py-4">
@@ -265,44 +306,6 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Legend / filter + download */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2 items-center">
-            {QCE_SUBJECTS.map(subject => {
-              const isVisible = !hidden.has(subject)
-              const colors = SUBJECT_COLORS[subject]
-              return (
-                <button
-                  key={subject}
-                  onClick={() => toggleSubject(subject)}
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-150"
-                  style={{
-                    backgroundColor: isVisible ? colors.bg : '#f1f5f9',
-                    color: isVisible ? colors.text : '#94a3b8',
-                    opacity: isVisible ? 1 : 0.6,
-                  }}
-                >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: isVisible ? colors.text : '#94a3b8' }}
-                  />
-                  {subject}
-                </button>
-              )
-            })}
-            <span className="text-[11px] text-muted-foreground">click to hide</span>
-          </div>
-
-          <button
-            onClick={() => downloadICS(hidden, events)}
-            className="flex items-center gap-1.5 rounded-full border border-border/60 bg-white px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-all duration-150 hover:border-foreground/20 hover:text-foreground"
-          >
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Download .ics
-          </button>
-        </div>
       </main>
     </div>
     </PageGate>
