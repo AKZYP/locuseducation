@@ -3,7 +3,12 @@
 import { useEffect, useState } from 'react'
 import { Navbar } from '@/components/navbar'
 
-type Phase = 'intro' | 'shrinking' | 'done'
+type Phase = 'typing' | 'shrinking' | 'done'
+
+const TYPING_TEXT     = "Education shouldn\u2019t be a pay-to-win system."
+const TYPING_SPEED    = 52
+const SEG_PREFIX_END  = 25   // "Education shouldn't be a "
+const SEG_HIGHLIGHT_END = 35 // + "pay-to-win"
 
 const SIDE_EQUATIONS_LEFT = [
   { top: '14%', text: 'f(x) = ax² + bx + c' },
@@ -13,7 +18,7 @@ const SIDE_EQUATIONS_LEFT = [
 ]
 
 const SIDE_EQUATIONS_RIGHT = [
-  { top: '8%', text: "dy/dx = 2x + 3" },
+  { top: '8%',  text: 'dy/dx = 2x + 3' },
   { top: '26%', text: 'a² + b² = c²' },
   { top: '48%', text: "f'(x) = lim (f(x+h)−f(x))/h" },
   { top: '68%', text: 'Σⁿ k = n(n+1)/2' },
@@ -22,43 +27,76 @@ const SIDE_EQUATIONS_RIGHT = [
 
 export function MissionClient() {
   const [phase, setPhase] = useState<Phase>(() => {
-    if (typeof window === 'undefined') return 'intro'
-    return sessionStorage.getItem('mission-intro-seen') ? 'done' : 'intro'
+    if (typeof window === 'undefined') return 'typing'
+    return sessionStorage.getItem('mission-intro-seen') ? 'done' : 'typing'
   })
+  const [displayed, setDisplayed] = useState('')
+  const [cursorOn, setCursorOn] = useState(true)
 
+  // Single effect — runs once on mount, drives the whole sequence via closure
   useEffect(() => {
     if (phase === 'done') return
-    sessionStorage.setItem('mission-intro-seen', '1')
-    const t1 = setTimeout(() => setPhase('shrinking'), 1800)
-    const t2 = setTimeout(() => setPhase('done'), 3000)
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-    }
-  }, [phase])
+    let i = 0
+    let blinkId: ReturnType<typeof setInterval>
+
+    const typer = setInterval(() => {
+      i++
+      setDisplayed(TYPING_TEXT.slice(0, i))
+      if (i >= TYPING_TEXT.length) {
+        clearInterval(typer)
+        // Blink cursor for 900ms then shrink
+        blinkId = setInterval(() => setCursorOn(v => !v), 450)
+        setTimeout(() => {
+          clearInterval(blinkId)
+          setCursorOn(false)
+          setPhase('shrinking')
+          // After fade-out, reveal content
+          setTimeout(() => {
+            sessionStorage.setItem('mission-intro-seen', '1')
+            setPhase('done')
+          }, 1000)
+        }, 900)
+      }
+    }, TYPING_SPEED)
+
+    return () => { clearInterval(typer); clearInterval(blinkId) }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function renderTypedText() {
+    const n = displayed.length
+    const prefix    = displayed.slice(0, Math.min(n, SEG_PREFIX_END))
+    const highlight = n > SEG_PREFIX_END    ? displayed.slice(SEG_PREFIX_END,    Math.min(n, SEG_HIGHLIGHT_END)) : ''
+    const suffix    = n > SEG_HIGHLIGHT_END ? displayed.slice(SEG_HIGHLIGHT_END, n) : ''
+
+    return (
+      <>
+        {prefix}
+        {highlight && <span className="serif-italic olive">{highlight}</span>}
+        {suffix}
+        {phase !== 'done' && cursorOn && <span className="tw-cursor">|</span>}
+      </>
+    )
+  }
 
   return (
     <>
       <style>{`
         :root {
-          --paper: #faf7ef;
+          --paper:      #faf7ef;
           --paper-line: #e5dfd0;
-          --ink: #1c1a17;
-          --ink-soft: #5a5349;
-          --ink-muted: #8b8375;
-          --olive: #6b7f4e;
+          --ink:        #1c1a17;
+          --ink-soft:   #5a5349;
+          --ink-muted:  #8b8375;
+          --olive:      #6b7f4e;
           --olive-soft: #93a178;
-          --rust: #b8562b;
+          --rust:       #b8562b;
         }
         .notebook {
           background-color: var(--paper);
-          background-image:
-            repeating-linear-gradient(
-              transparent 0px,
-              transparent 31px,
-              var(--paper-line) 31px,
-              var(--paper-line) 32px
-            );
+          background-image: repeating-linear-gradient(
+            transparent 0px, transparent 31px,
+            var(--paper-line) 31px, var(--paper-line) 32px
+          );
           color: var(--ink);
         }
         .ink       { color: var(--ink); }
@@ -76,74 +114,20 @@ export function MissionClient() {
           font-style: italic;
         }
 
-        /* Intro animation ------------------------------------------------- */
-        @keyframes intro-fade-in {
-          0%   { opacity: 0; transform: translateY(14px); letter-spacing: 0.02em; }
-          100% { opacity: 1; transform: translateY(0);    letter-spacing: -0.01em; }
-        }
-        @keyframes intro-underline {
-          0%   { transform: scaleX(0); }
-          100% { transform: scaleX(1); }
-        }
-        @keyframes content-rise {
-          0%   { opacity: 0; transform: translateY(16px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes float-drift {
-          0%, 100% { transform: translate(0, 0) rotate(-0.5deg); opacity: 0.35; }
-          50%      { transform: translate(10px, -8px) rotate(0.5deg); opacity: 0.55; }
-        }
-        @keyframes equation-glow {
-          0%, 100% { text-shadow: 0 0 0 rgba(107, 127, 78, 0), 0 0 0 rgba(184, 86, 43, 0.1); }
-          50%      { text-shadow: 0 0 8px rgba(107, 127, 78, 0.4), 0 0 12px rgba(184, 86, 43, 0.15); }
-        }
-        @keyframes equation-slide-in-left {
-          0%   { opacity: 0; transform: translateX(-40px) scaleX(0.8); }
-          100% { opacity: 0.55; transform: translateX(0) scaleX(1); }
-        }
-        @keyframes equation-slide-in-right {
-          0%   { opacity: 0; transform: translateX(40px) scaleX(0.8); }
-          100% { opacity: 0.55; transform: translateX(0) scaleX(1); }
-        }
-        @keyframes typewriter {
-          0% {
-            width: 0;
-            visibility: hidden;
-          }
-          99% {
-            visibility: visible;
-          }
-          100% {
-            width: 100%;
-          }
-        }
-        @keyframes typewriter-blink {
-          0%, 49% {
-            border-right-color: var(--ink);
-          }
-          50%, 100% {
-            border-right-color: transparent;
-          }
-        }
-        .typewriter {
+        /* Typewriter cursor */
+        .tw-cursor {
           display: inline-block;
-          max-width: 100%;
-          overflow: hidden;
-          white-space: normal;
-          word-wrap: break-word;
-          word-break: break-word;
-          animation: typewriter 2.5s steps(60, end) forwards;
+          font-weight: 300;
+          color: var(--ink);
+          margin-left: 1px;
+          animation: cursor-blink 0.7s step-end infinite;
         }
-        .typewriter-container {
-          position: relative;
-          display: inline;
+        @keyframes cursor-blink {
+          0%, 49% { opacity: 1; }
+          50%, 100% { opacity: 0; }
         }
-        .typewriter-container.with-cursor::after {
-          content: '';
-          position: absolute;
-          border-right: 2px solid var(--ink);
-          animation: typewriter-blink 0.7s step-end infinite;
-        }
+
+        /* Intro overlay */
         .intro-overlay {
           position: fixed;
           inset: 0;
@@ -152,56 +136,36 @@ export function MissionClient() {
           align-items: center;
           justify-content: center;
           background-color: var(--paper);
-          background-image:
-            repeating-linear-gradient(
-              transparent 0px, transparent 31px,
-              var(--paper-line) 31px, var(--paper-line) 32px
-            );
-          transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1);
+          background-image: repeating-linear-gradient(
+            transparent 0px, transparent 31px,
+            var(--paper-line) 31px, var(--paper-line) 32px
+          );
+          transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1);
           pointer-events: none;
         }
         .intro-title {
           text-align: center;
-          max-width: 90vw;
-          transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1),
-                      opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
-                      font-size 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+          max-width: 80vw;
+          transition:
+            transform 1000ms cubic-bezier(0.22, 1, 0.36, 1),
+            opacity   800ms cubic-bezier(0.22, 1, 0.36, 1),
+            font-size 1000ms cubic-bezier(0.22, 1, 0.36, 1);
           will-change: transform, opacity;
-          animation: intro-fade-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-        .hero-title.hidden-initial { opacity: 0; }
-        .hero-title.reveal { animation: content-rise 900ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both; }
-        .content.hidden-initial { opacity: 0; pointer-events: none; }
-        .content.reveal { animation: content-rise 900ms cubic-bezier(0.22, 1, 0.36, 1) 400ms both; }
-
-        .floating-eq {
-          position: absolute;
-          font-family: var(--font-serif), Georgia, serif;
-          font-style: italic;
-          color: var(--ink-muted);
-          font-size: 16px;
-          font-weight: 500;
-          opacity: 0.35;
-          pointer-events: none;
-          user-select: none;
-          white-space: nowrap;
-          animation: float-drift 14s ease-in-out infinite, equation-glow 4s ease-in-out infinite;
-          will-change: transform;
-        }
-        .floating-eq.from-left {
-          animation: equation-slide-in-left 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards, float-drift 14s ease-in-out 1.2s infinite, equation-glow 4s ease-in-out infinite;
-        }
-        .floating-eq.from-right {
-          animation: equation-slide-in-right 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards, float-drift 14s ease-in-out 1.2s infinite, equation-glow 4s ease-in-out infinite;
         }
 
-        .doodle {
-          position: absolute;
-          pointer-events: none;
-          opacity: 0.45;
-          color: var(--ink-muted);
+        /* Content reveal */
+        @keyframes content-rise {
+          0%   { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
+        .content-hidden { opacity: 0; pointer-events: none; }
+        .content-reveal { animation: content-rise 900ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both; }
 
+        /* Accent underline on pay-to-win in header */
+        @keyframes intro-underline {
+          0%   { transform: scaleX(0); }
+          100% { transform: scaleX(1); }
+        }
         .accent-underline {
           position: relative;
           display: inline-block;
@@ -214,23 +178,64 @@ export function MissionClient() {
           background: color-mix(in oklab, var(--olive) 28%, transparent);
           z-index: -1;
           transform-origin: left;
-          animation: intro-underline 900ms cubic-bezier(0.22, 1, 0.36, 1) 700ms both;
+          animation: intro-underline 900ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
         }
 
-        /* Reset outer bg so navbar area also looks like paper */
+        /* Floating equations */
+        @keyframes float-drift {
+          0%, 100% { transform: translate(0, 0) rotate(-0.5deg); }
+          50%      { transform: translate(8px, -7px) rotate(0.5deg); }
+        }
+        @keyframes eq-in-left {
+          from { opacity: 0; transform: translateX(-32px); }
+          to   { opacity: 0.5; transform: translateX(0); }
+        }
+        @keyframes eq-in-right {
+          from { opacity: 0; transform: translateX(32px); }
+          to   { opacity: 0.5; transform: translateX(0); }
+        }
+        .floating-eq {
+          position: absolute;
+          font-family: var(--font-serif), Georgia, serif;
+          font-style: italic;
+          color: var(--ink-muted);
+          font-size: 15px;
+          pointer-events: none;
+          user-select: none;
+          white-space: nowrap;
+        }
+        .floating-eq.from-left {
+          animation:
+            eq-in-left 1s cubic-bezier(0.22,1,0.36,1) both,
+            float-drift 14s ease-in-out 1s infinite;
+        }
+        .floating-eq.from-right {
+          animation:
+            eq-in-right 1s cubic-bezier(0.22,1,0.36,1) both,
+            float-drift 14s ease-in-out 1s infinite;
+        }
+
+        /* Doodles */
+        .doodle {
+          position: absolute;
+          pointer-events: none;
+          opacity: 0.4;
+          color: var(--ink-muted);
+        }
+
         .mission-root { min-height: 100vh; }
       `}</style>
 
       <div className="notebook mission-root relative overflow-hidden">
         <Navbar />
 
-        {/* Decorative floating equations on the sides */}
+        {/* Side equations */}
         <div className="pointer-events-none absolute inset-0 hidden md:block" aria-hidden>
           {SIDE_EQUATIONS_LEFT.map((eq, i) => (
             <span
               key={`l-${i}`}
               className="floating-eq from-left"
-              style={{ top: eq.top, left: '3%', animationDelay: `${i * 1.4}s, 0s, ${i * 0.8}s` }}
+              style={{ top: eq.top, left: '3%', animationDelay: `${i * 1.3}s, ${i * 1.3}s` }}
             >
               {eq.text}
             </span>
@@ -239,7 +244,7 @@ export function MissionClient() {
             <span
               key={`r-${i}`}
               className="floating-eq from-right"
-              style={{ top: eq.top, right: '3%', animationDelay: `${i * 1.8}s, 0s, ${i * 0.9}s` }}
+              style={{ top: eq.top, right: '3%', animationDelay: `${i * 1.6}s, ${i * 1.6}s` }}
             >
               {eq.text}
             </span>
@@ -249,12 +254,12 @@ export function MissionClient() {
           <svg className="doodle hidden lg:block" style={{ top: '10%', left: '2%' }} width="140" height="110" viewBox="0 0 140 110" fill="none" stroke="currentColor" strokeWidth="1">
             <path d="M10 95 L70 10 L130 95 Z" />
             <path d="M70 10 L70 95" strokeDasharray="3 3" />
-            <text x="4" y="108" fontSize="10" fill="currentColor" stroke="none" fontStyle="italic">A</text>
+            <text x="4"   y="108" fontSize="10" fill="currentColor" stroke="none" fontStyle="italic">A</text>
             <text x="130" y="108" fontSize="10" fill="currentColor" stroke="none" fontStyle="italic">B</text>
-            <text x="64" y="8" fontSize="10" fill="currentColor" stroke="none" fontStyle="italic">C</text>
+            <text x="64"  y="8"   fontSize="10" fill="currentColor" stroke="none" fontStyle="italic">C</text>
           </svg>
 
-          {/* Circle with radius */}
+          {/* Circle */}
           <svg className="doodle hidden lg:block" style={{ bottom: '8%', right: '2%' }} width="130" height="130" viewBox="0 0 130 130" fill="none" stroke="currentColor" strokeWidth="1">
             <circle cx="65" cy="65" r="55" />
             <path d="M65 65 L118 50" />
@@ -270,27 +275,22 @@ export function MissionClient() {
           </svg>
         </div>
 
-        {/* Intro overlay */}
+        {/* Intro typewriter overlay */}
         {phase !== 'done' && (
           <div
             className="intro-overlay"
-            style={{
-              opacity: phase === 'shrinking' ? 0 : 1,
-            }}
+            style={{ opacity: phase === 'shrinking' ? 0 : 1 }}
           >
             <h1
               className="intro-title serif ink"
               style={{
-                fontSize: phase === 'shrinking' ? '2rem' : 'clamp(2.5rem, 7vw, 5.5rem)',
-                transform: phase === 'shrinking' ? 'translateY(-30vh) scale(0.55)' : 'translateY(0)',
-                opacity: phase === 'shrinking' ? 0 : 1,
-                lineHeight: 1.05,
+                fontSize:  phase === 'shrinking' ? '2rem'                 : 'clamp(3rem, 8vw, 6.5rem)',
+                transform: phase === 'shrinking' ? 'translateY(-32vh) scale(0.52)' : 'translateY(0)',
+                opacity:   phase === 'shrinking' ? 0                      : 1,
+                lineHeight: 1.08,
               }}
             >
-              <span className="typewriter">
-                Education shouldn&apos;t be a{' '}
-                <span className="serif-italic olive">pay-to-win</span> system.
-              </span>
+              {renderTypedText()}
             </h1>
           </div>
         )}
@@ -298,8 +298,8 @@ export function MissionClient() {
         {/* Main content */}
         <main className="relative z-10 mx-auto max-w-3xl px-6 pt-24 pb-24">
 
-          {/* Hero */}
-          <header className={`space-y-8 pt-8 ${phase === 'done' ? '' : 'hidden-initial'}`}>
+          {/* Hero header */}
+          <header className={`space-y-8 pt-8 ${phase === 'done' ? 'content-reveal' : 'content-hidden'}`}>
             <div className="flex items-center gap-3">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--rust)] animate-pulse" />
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] ink-muted">
@@ -307,47 +307,47 @@ export function MissionClient() {
               </p>
             </div>
             <h1 className="serif text-5xl md:text-7xl ink leading-[1.05]">
-              <span className="typewriter" style={{ animationDuration: '2s', animationDelay: '0.3s' }}>
-                Education shouldn&apos;t be a{' '}
-                <span className="serif-italic olive accent-underline">pay-to-win</span>{' '}
-                system.
-              </span>
+              Education shouldn&apos;t be a{' '}
+              <span className="serif-italic olive accent-underline">pay-to-win</span>{' '}
+              system.
             </h1>
             <p className="serif-italic text-xl md:text-2xl ink-soft leading-relaxed max-w-2xl">
               But right now, it is. And I&apos;ve lived both sides of it.
             </p>
           </header>
 
-          <div className={`content ${phase === 'done' ? '' : 'hidden-initial'}`}>
+          <div className={phase === 'done' ? 'content-reveal' : 'content-hidden'}>
 
             {/* My Story */}
-            <section className="mt-20 space-y-6">
+            <section className="mt-20 space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-px flex-1 bg-[var(--paper-line)]" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] ink-muted">
-                  My Story
-                </p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] ink-muted">My Story</p>
                 <div className="h-px flex-1 bg-[var(--paper-line)]" />
               </div>
 
-              <div className="space-y-6 text-[17px] ink-soft leading-[1.8]">
-                <p className="first-letter:serif first-letter:text-5xl first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:leading-none first-letter:ink">
-                  I know the <span className="serif-italic ink">value</span> of good tutoring. I&apos;ve been on both sides of it.
+              <div className="space-y-5 text-[17px] ink-soft leading-7">
+                <p>
+                  I know the <span className="serif-italic ink">value</span> of good tutoring. I&apos;ve been on the receiving end of it.
                 </p>
                 <p>
-                  Growing up, a tutor helped me understand Maths in ways that finally clicked. They explained concepts properly, broke down hard problems step by step, and made studying feel possible instead of hopeless. My grades changed. My confidence changed. I saw what good teaching actually does.
+                  A tutor helped me understand Maths in ways that finally clicked — explaining concepts properly, breaking down hard problems step by step, making studying feel possible instead of hopeless. My grades changed. My confidence changed. I saw what good teaching actually does.
                 </p>
-                <p className="serif text-2xl md:text-3xl ink leading-snug py-2">
-                  That tutor charged $80 an hour. For many families, even that is out of reach.
+              </div>
+
+              <p className="serif text-2xl md:text-[1.75rem] ink leading-snug border-l-2 border-[var(--olive)] pl-5">
+                That tutor charged $80 an hour. For many families, even that is out of reach.
+              </p>
+
+              <div className="space-y-5 text-[17px] ink-soft leading-7">
+                <p>
+                  After I graduated, I started tutoring other students myself. And I charged $70 to $100 an hour. It felt easy. The money was good. I was technically helping people, right?
                 </p>
                 <p>
-                  After I graduated, I started tutoring other students. And I charged $70 to $100 an hour. It felt easy. The money was good. I was technically helping people, right?
+                  But here&apos;s what I didn&apos;t think about then: the 16-year-old who can&apos;t ask their parents for another $80 session. The brilliant student sitting in class struggling alone because their family just can&apos;t afford help — even though they need it more than anyone.
                 </p>
                 <p>
-                  But here&apos;s what I didn&apos;t think about then: the 16-year-old who can&apos;t ask their parents for another $80 session. The brilliant student sitting in class struggling alone because their family just can&apos;t afford help, even though they need it more than anyone.
-                </p>
-                <p>
-                  And I noticed something else. A lot of tutors out there aren&apos;t resourceful. They&apos;re teaching outdated syllabus content. They&apos;re unprofessional. And they&apos;re still charging $70-100 an hour. No wonder students feel ripped off. No wonder access to <span className="serif-italic">good</span> tutoring stays locked behind a paywall.
+                  And I noticed something else. A lot of tutors out there aren&apos;t resourceful. They&apos;re teaching outdated syllabus content. They&apos;re unprofessional. And they&apos;re still charging $70–100 an hour. No wonder students feel ripped off. No wonder access to <span className="serif-italic ink">good</span> tutoring stays locked behind a paywall.
                 </p>
                 <p className="serif-italic text-xl ink">
                   So I&apos;m doing this differently.
@@ -357,25 +357,19 @@ export function MissionClient() {
 
             {/* The Gap */}
             <section className="mt-20">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive mb-6">
-                The Gap
-              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive mb-6">The Gap</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-6 border-b border-[var(--paper-line)]">
                 <div className="space-y-2">
                   <p className="serif text-6xl ink leading-none">
                     $100<span className="serif-italic text-2xl ink-muted">/hr</span>
                   </p>
-                  <p className="text-sm ink-soft serif-italic">
-                    what families pay for private tutoring
-                  </p>
+                  <p className="text-sm ink-soft serif-italic">what families pay for private tutoring</p>
                 </div>
                 <div className="space-y-2">
                   <p className="serif text-6xl olive leading-none">
                     $0<span className="serif-italic text-2xl ink-muted">/hr</span>
                   </p>
-                  <p className="text-sm ink-soft serif-italic">
-                    what everyone else has to work with
-                  </p>
+                  <p className="text-sm ink-soft serif-italic">what everyone else has to work with</p>
                 </div>
               </div>
               <p className="mt-6 serif text-xl ink leading-relaxed">
@@ -388,8 +382,8 @@ export function MissionClient() {
             <section className="mt-24 relative">
               <span className="serif absolute -top-10 -left-2 text-8xl olive opacity-30 leading-none">&ldquo;</span>
               <p className="serif text-3xl md:text-4xl ink leading-snug max-w-2xl pl-8">
-                If I couldn&apos;t buy my way in,{' '}
-                <span className="serif-italic olive">I&apos;d build the door myself.</span>
+                If I could take easy money from this system,{' '}
+                <span className="serif-italic olive">I can also be the one to break it.</span>
               </p>
               <p className="mt-4 pl-8 text-sm ink-muted serif-italic">— Why I started Locus</p>
             </section>
@@ -397,9 +391,7 @@ export function MissionClient() {
             {/* What This Is */}
             <section className="mt-24 space-y-8">
               <div className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive">
-                  What This Is
-                </p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive">What This Is</p>
                 <h2 className="serif text-4xl md:text-5xl ink leading-[1.1]">
                   Real tutoring.{' '}
                   <span className="serif-italic">Zero cost.</span>{' '}
@@ -412,21 +404,9 @@ export function MissionClient() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
                 {[
-                  {
-                    title: 'Live Sessions',
-                    desc: 'Weekly streams that break concepts down properly — not just slides being read.',
-                    glyph: '∫',
-                  },
-                  {
-                    title: 'Recordings',
-                    desc: 'Miss it? Rewatch it. Every session stays up, forever.',
-                    glyph: '▸',
-                  },
-                  {
-                    title: 'Resources',
-                    desc: 'Cheat sheets and study guides. Straight to the point. Save you hours.',
-                    glyph: 'Σ',
-                  },
+                  { title: 'Live Sessions', desc: 'Weekly streams that break concepts down properly — not just slides being read.', glyph: '∫' },
+                  { title: 'Recordings',    desc: 'Miss it? Rewatch it. Every session stays up, forever.',                         glyph: '▸' },
+                  { title: 'Resources',     desc: 'Cheat sheets and study guides. Straight to the point. Save you hours.',          glyph: 'Σ' },
                 ].map(({ title, desc, glyph }) => (
                   <div
                     key={title}
@@ -442,75 +422,48 @@ export function MissionClient() {
 
             {/* What It's Not */}
             <section className="mt-20">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive mb-6">
-                What It&apos;s Not
-              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive mb-6">What It&apos;s Not</p>
               <div className="flex flex-wrap gap-3">
-                {['Subscriptions', 'Hidden costs', 'Premium tiers', 'Free trials', 'Paywalls'].map(
-                  (item) => (
-                    <div
-                      key={item}
-                      className="inline-flex items-center gap-2 border border-[var(--paper-line)] bg-[color-mix(in_oklab,var(--paper)_50%,white_50%)] rounded-full px-5 py-2"
-                    >
-                      <span className="rust text-base leading-none">✕</span>
-                      <span className="serif-italic text-[15px] ink-soft">{item}</span>
-                    </div>
-                  )
-                )}
+                {['Subscriptions', 'Hidden costs', 'Premium tiers', 'Free trials', 'Paywalls'].map((item) => (
+                  <div
+                    key={item}
+                    className="inline-flex items-center gap-2 border border-[var(--paper-line)] bg-[color-mix(in_oklab,var(--paper)_50%,white_50%)] rounded-full px-5 py-2"
+                  >
+                    <span className="rust text-base leading-none">✕</span>
+                    <span className="serif-italic text-[15px] ink-soft">{item}</span>
+                  </div>
+                ))}
               </div>
             </section>
 
             {/* Why This Exists */}
             <section className="mt-24 relative py-12 border-y-2 border-[var(--ink)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] ink-muted mb-8">
-                Why This Exists
-              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] ink-muted mb-8">Why This Exists</p>
               <div className="space-y-2">
-                <p className="serif text-5xl md:text-6xl ink leading-[1.05]">
-                  Because ability isn&apos;t the issue.
-                </p>
-                <p className="serif-italic text-5xl md:text-6xl olive leading-[1.05]">
-                  Access is.
-                </p>
+                <p className="serif text-5xl md:text-6xl ink leading-[1.05]">Because ability isn&apos;t the issue.</p>
+                <p className="serif-italic text-5xl md:text-6xl olive leading-[1.05]">Access is.</p>
               </div>
               <p className="mt-8 text-lg ink-soft leading-relaxed max-w-xl">
-                Your results shouldn&apos;t depend on what your parents can spend. And if I
-                can do anything about that — even a little — I will.
+                Your results shouldn&apos;t depend on what your parents can spend. And if I can do anything about that — even a little — I will.
               </p>
             </section>
 
             {/* How It Works */}
             <section className="mt-24">
               <div className="space-y-3 mb-10">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive">
-                  How It Works
-                </p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive">How It Works</p>
                 <h2 className="serif text-4xl md:text-5xl ink leading-[1.1]">
                   Three steps. <span className="serif-italic">That&apos;s it.</span>
                 </h2>
               </div>
               <div className="space-y-8">
                 {[
-                  {
-                    step: 'I.',
-                    title: 'Join weekly live sessions',
-                    desc: 'Show up online. Ask questions. Learn alongside other students in real time.',
-                  },
-                  {
-                    step: 'II.',
-                    title: 'Learn step-by-step',
-                    desc: 'No skipping. No fluff. Concepts built from the ground up until they click.',
-                  },
-                  {
-                    step: 'III.',
-                    title: 'Rewatch + use resources',
-                    desc: 'Every session recorded. Study guides always free. Revisit anything, anytime.',
-                  },
+                  { step: 'I.',   title: 'Join weekly live sessions', desc: 'Show up online. Ask questions. Learn alongside other students in real time.' },
+                  { step: 'II.',  title: 'Learn step-by-step',        desc: 'No skipping. No fluff. Concepts built from the ground up until they click.' },
+                  { step: 'III.', title: 'Rewatch + use resources',   desc: 'Every session recorded. Study guides always free. Revisit anything, anytime.' },
                 ].map(({ step, title, desc }) => (
                   <div key={step} className="flex gap-6 items-start pb-8 border-b border-[var(--paper-line)] last:border-0">
-                    <div className="serif-italic text-3xl olive leading-none tabular-nums pt-1 w-14 shrink-0">
-                      {step}
-                    </div>
+                    <div className="serif-italic text-3xl olive leading-none tabular-nums pt-1 w-14 shrink-0">{step}</div>
                     <div className="space-y-1.5">
                       <h3 className="serif text-2xl ink leading-snug">{title}</h3>
                       <p className="text-[15px] ink-soft leading-relaxed">{desc}</p>
@@ -520,25 +473,20 @@ export function MissionClient() {
               </div>
             </section>
 
-            {/* The Goal / CTA */}
+            {/* CTA */}
             <section className="mt-24 text-center space-y-8 py-14 border-t-2 border-b-2 border-[var(--ink)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive">
-                The Goal
-              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive">The Goal</p>
               <h2 className="serif text-4xl md:text-6xl ink leading-[1.1] max-w-2xl mx-auto">
                 Help as many students as possible{' '}
                 <span className="serif-italic olive">close the gap.</span>
               </h2>
-              <p className="serif-italic text-xl ink-soft">
-                That&apos;s it. That&apos;s the whole thing.
-              </p>
+              <p className="serif-italic text-xl ink-soft">That&apos;s it. That&apos;s the whole thing.</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
                 <a
                   href="/"
                   className="inline-flex items-center gap-2 bg-[var(--ink)] text-[var(--paper)] px-7 py-3.5 text-sm font-medium hover:-translate-y-0.5 transition-transform"
                 >
-                  Start learning — free
-                  <span aria-hidden>→</span>
+                  Start learning — free <span aria-hidden>→</span>
                 </a>
                 <a
                   href="/calendar"
