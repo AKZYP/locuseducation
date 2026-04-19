@@ -459,26 +459,25 @@ export function MissionClient() {
                   <span className="serif-italic">Zero cost.</span>{' '}
                   No catch.
                 </h2>
-                <p className="serif-italic text-lg ink-soft">
-                  I&apos;m a university student, and I&apos;m giving away what I wish I had.
-                </p>
+
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
                 {[
-                  { title: 'Live Sessions', desc: 'Weekly streams that break concepts down properly — not just slides being read.', glyph: '∫' },
-                  { title: 'Recordings',    desc: 'Miss it? Rewatch it. Every session stays up, forever.',                         glyph: '▸' },
-                  { title: 'Resources',     desc: 'Cheat sheets and study guides. Straight to the point. Save you hours.',          glyph: 'Σ' },
-                ].map(({ title, desc, glyph }, i) => (
-                  <div
+                  { title: 'Live Sessions', desc: 'Weekly streams that break concepts down properly — not just slides being read.', glyph: '∫', href: '/calendar' },
+                  { title: 'Recordings',    desc: 'Miss it? Rewatch it. Every session stays up, forever.',                         glyph: '▸', href: '/' },
+                  { title: 'Resources',     desc: 'Cheat sheets and study guides. Straight to the point. Save you hours.',          glyph: 'Σ', href: '/resources' },
+                ].map(({ title, desc, glyph, href }, i) => (
+                  <a
                     key={title}
-                    className="scroll-reveal relative bg-[color-mix(in_oklab,var(--paper)_60%,white_40%)] border border-[var(--paper-line)] rounded-sm p-6 hover:border-[var(--olive)] hover:-translate-y-0.5 transition-all duration-300"
+                    href={href}
+                    className="scroll-reveal relative bg-[color-mix(in_oklab,var(--paper)_60%,white_40%)] border border-[var(--paper-line)] rounded-sm p-6 hover:border-[var(--olive)] hover:-translate-y-0.5 transition-all duration-300 block"
                     style={{ transitionDelay: `${i * 0.1}s` }}
                   >
                     <div className="serif olive text-4xl mb-3 leading-none">{glyph}</div>
                     <h3 className="serif text-xl ink mb-1.5">{title}</h3>
                     <p className="text-sm ink-soft leading-relaxed">{desc}</p>
-                  </div>
+                  </a>
                 ))}
               </div>
             </section>
@@ -486,7 +485,7 @@ export function MissionClient() {
             {/* What It's Not */}
             <section className="mt-20 text-center">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] rust mb-8">What It&apos;s Not</p>
-              <div className="not-group scroll-reveal relative inline-block w-full">
+              <div className="not-group scroll-reveal relative max-w-xs mx-auto">
                 <div className="space-y-1 py-2">
                   {['Subscriptions', 'Hidden costs', 'Premium tiers', 'Free trials', 'Paywalls'].map((item) => (
                     <p key={item} className="serif text-3xl md:text-4xl ink-soft">{item}</p>
