@@ -365,7 +365,7 @@ export function MissionClient() {
 
               <div className="space-y-5 text-[17px] ink-soft leading-7">
                 <p>
-                  I knew I was good at what I did. Being a high school teacher is something I hope to start doing when I&apos;m older.
+                  I had proof I was good at this. <span className="serif ink font-semibold">99.85 ATAR.</span> Being a high school teacher is something I hope to start doing when I&apos;m older.
                   I could explain things clearly, and students gave positive feedback.
                 </p>
                 <p>
