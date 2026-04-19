@@ -237,27 +237,19 @@ export function MissionClient() {
           transform: translateY(0);
         }
 
-        /* What It's Not strikethrough */
-        .not-item {
-          position: relative;
-          display: block;
+        /* What It's Not — big X */
+        .not-x-line {
+          stroke-dasharray: 136;
+          stroke-dashoffset: 136;
         }
-        .not-item::after {
-          content: '';
-          position: absolute;
-          left: 0; right: 0;
-          top: 54%;
-          height: 2.5px;
-          background: var(--rust);
-          transform: scaleX(0);
-          transform-origin: left;
+        .not-group.in-view .not-x-line-1 {
+          animation: draw-x 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
         }
-        .not-item.in-view::after {
-          animation: strike 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--strike-delay, 0s) both;
+        .not-group.in-view .not-x-line-2 {
+          animation: draw-x 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.38s both;
         }
-        @keyframes strike {
-          from { transform: scaleX(0); }
-          to   { transform: scaleX(1); }
+        @keyframes draw-x {
+          to { stroke-dashoffset: 0; }
         }
 
         /* Doodles */
@@ -492,18 +484,23 @@ export function MissionClient() {
             </section>
 
             {/* What It's Not */}
-            <section className="mt-20">
+            <section className="mt-20 text-center">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] rust mb-8">What It&apos;s Not</p>
-              <div className="space-y-2">
-                {['Subscriptions', 'Hidden costs', 'Premium tiers', 'Free trials', 'Paywalls'].map((item, i) => (
-                  <div
-                    key={item}
-                    className="not-item scroll-reveal"
-                    style={{ transitionDelay: `${i * 0.07}s`, '--strike-delay': `${i * 0.11 + 0.2}s` } as React.CSSProperties}
-                  >
-                    <span className="serif text-3xl md:text-4xl ink-soft">{item}</span>
-                  </div>
-                ))}
+              <div className="not-group scroll-reveal relative inline-block w-full">
+                <div className="space-y-1 py-2">
+                  {['Subscriptions', 'Hidden costs', 'Premium tiers', 'Free trials', 'Paywalls'].map((item) => (
+                    <p key={item} className="serif text-3xl md:text-4xl ink-soft">{item}</p>
+                  ))}
+                </div>
+                <svg
+                  className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  fill="none"
+                >
+                  <line className="not-x-line not-x-line-1" x1="2" y1="2" x2="98" y2="98" stroke="var(--rust)" strokeWidth="1.2" strokeLinecap="round" />
+                  <line className="not-x-line not-x-line-2" x1="98" y1="2" x2="2" y2="98" stroke="var(--rust)" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
               </div>
             </section>
 
