@@ -156,6 +156,16 @@ Object.values(TOPICS_BY_SUBJECT).forEach(subjectTopics => {
 export const TOPICS = Array.from(allTopics)
 export type Topic = typeof TOPICS[number]
 
+// Question submissions
+export interface QuestionSubmission {
+  id: string
+  fileUrl: string
+  fileName: string
+  subject: Subject
+  status: 'pending' | 'selected' | 'archived'
+  uploadedAt: string
+}
+
 // Calendar
 export interface CalendarEvent {
   id: string

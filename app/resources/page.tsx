@@ -1,21 +1,33 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Navbar } from '@/components/navbar'
 import { PageGate } from '@/components/page-gate'
-import { getResources } from '@/lib/store'
+import { getResources, getSelectedQuestions } from '@/lib/supabase-store'
 import { TOPICS, SUBJECTS } from '@/lib/types'
-import type { Resource, Topic, Subject } from '@/lib/types'
+import type { Resource, Topic, Subject, QuestionSubmission } from '@/lib/types'
 
 export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([])
+  const [selectedQuestions, setSelectedQuestions] = useState<QuestionSubmission[]>([])
   const [search, setSearch] = useState('')
   const [selectedTopic, setSelectedTopic] = useState<Topic>('All Topics')
   const [selectedSubject, setSelectedSubject] = useState<Subject>('Methods')
   const [showFilters, setShowFilters] = useState(false)
 
+  // Upload state
+  const [uploadSubject, setUploadSubject] = useState<Subject>('Methods')
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [uploadError, setUploadError] = useState('')
+  const [dragOver, setDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
-    setResources(getResources())
+    Promise.all([getResources(), getSelectedQuestions()]).then(([r, q]) => {
+      setResources(r)
+      setSelectedQuestions(q)
+    })
   }, [])
 
   const filteredResources = useMemo(() => {
@@ -27,6 +39,54 @@ export default function ResourcesPage() {
       return matchesSearch && matchesTopic
     })
   }, [resources, search, selectedTopic, selectedSubject])
+
+  const handleFileSelect = (file: File) => {
+    if (file.type !== 'application/pdf') {
+      setUploadError('Only PDF files are accepted.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('File must be under 5 MB.')
+      return
+    }
+    setUploadError('')
+    setUploadFile(file)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files[0]
+    if (file) handleFileSelect(file)
+  }
+
+  const handleUpload = async () => {
+    if (!uploadFile) return
+    setUploadStatus('loading')
+    try {
+      const form = new FormData()
+      form.append('file', uploadFile)
+      form.append('subject', uploadSubject)
+      const res = await fetch('/api/upload-question', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) {
+        setUploadError(data.error || 'Something went wrong.')
+        setUploadStatus('error')
+        return
+      }
+      setUploadStatus('success')
+      setUploadFile(null)
+    } catch {
+      setUploadError('Something went wrong. Try again.')
+      setUploadStatus('error')
+    }
+  }
+
+  const resetUpload = () => {
+    setUploadStatus('idle')
+    setUploadFile(null)
+    setUploadError('')
+  }
 
   return (
     <PageGate page="resources">
@@ -157,14 +217,14 @@ export default function ResourcesPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  
+
                   <span className="mb-2 inline-block w-fit rounded-full bg-primary/8 px-2.5 py-0.5 text-[11px] font-medium text-primary">
                     {resource.topic}
                   </span>
-                  
+
                   <h3 className="mb-1 text-sm font-semibold text-foreground">{resource.title}</h3>
                   <p className="mb-4 flex-1 text-xs text-muted-foreground leading-relaxed">{resource.description}</p>
-                  
+
                   <a
                     href={resource.fileUrl}
                     target="_blank"
@@ -180,6 +240,160 @@ export default function ResourcesPage() {
               ))}
             </div>
           )}
+
+          {/* This week's questions */}
+          {selectedQuestions.length > 0 && (
+            <div className="pt-2">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="h-px flex-1 bg-border/50" />
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">This week&apos;s questions</span>
+                <div className="h-px flex-1 bg-border/50" />
+              </div>
+              <p className="mb-4 text-sm text-muted-foreground">Student-submitted questions we&apos;ll be covering in the upcoming session.</p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {selectedQuestions.map((q) => (
+                  <a
+                    key={q.id}
+                    href={q.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm ring-1 ring-border/50 transition-all duration-200 hover:shadow-md hover:ring-border"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                      <svg className="h-4.5 w-4.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-foreground">{q.fileName}</p>
+                      <p className="text-xs text-muted-foreground">{q.subject}</p>
+                    </div>
+                    <svg className="h-4 w-4 shrink-0 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Submit a question */}
+          <div className="pt-2">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border/50" />
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Submit a question</span>
+              <div className="h-px flex-1 bg-border/50" />
+            </div>
+
+            <div className="rounded-2xl border border-border/50 bg-white p-6 shadow-sm">
+              <div className="mb-5">
+                <h2 className="text-sm font-semibold text-foreground">Got a tricky question?</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Upload a PDF with a single question — we&apos;ll pick some to cover in next week&apos;s session.
+                </p>
+              </div>
+
+              {uploadStatus === 'success' ? (
+                <div className="flex flex-col items-center gap-3 py-6 text-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground">
+                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Question submitted!</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">We&apos;ll let you know if it gets picked for next week.</p>
+                  </div>
+                  <button
+                    onClick={resetUpload}
+                    className="mt-1 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  >
+                    Submit another
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Subject selector */}
+                  <div className="flex gap-2">
+                    {(['Methods', 'Specialist'] as Subject[]).map(s => (
+                      <button
+                        key={s}
+                        onClick={() => setUploadSubject(s)}
+                        className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-150 ${
+                          uploadSubject === s
+                            ? 'bg-foreground text-white'
+                            : 'bg-secondary/60 text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Dropzone */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={handleDrop}
+                    className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 transition-all duration-150 ${
+                      dragOver
+                        ? 'border-foreground bg-secondary/30'
+                        : uploadFile
+                          ? 'border-foreground/30 bg-secondary/20'
+                          : 'border-border/60 hover:border-foreground/30 hover:bg-secondary/20'
+                    }`}
+                  >
+                    {uploadFile ? (
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                          <svg className="h-5 w-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium text-foreground">{uploadFile.name}</p>
+                        <p className="text-xs text-muted-foreground">{(uploadFile.size / 1024).toFixed(0)} KB · Click to change</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                          <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium text-foreground">Drop your PDF here</p>
+                        <p className="text-xs text-muted-foreground">or click to browse · PDF only · max 5 MB · one question per file</p>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0]
+                      if (f) handleFileSelect(f)
+                      e.target.value = ''
+                    }}
+                  />
+
+                  {uploadError && (
+                    <p className="text-xs text-red-500">{uploadError}</p>
+                  )}
+
+                  <button
+                    onClick={handleUpload}
+                    disabled={!uploadFile || uploadStatus === 'loading'}
+                    className="w-full rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {uploadStatus === 'loading' ? 'Uploading…' : 'Submit question'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       </main>
     </div>

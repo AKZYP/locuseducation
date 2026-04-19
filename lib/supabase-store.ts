@@ -377,6 +377,79 @@ export async function setScheduleSubject(subject: string, active: boolean): Prom
     .upsert({ key: `schedule_${subject}`, value: String(active) })
 }
 
+// Question submissions
+// Run this SQL in Supabase to set up:
+// create table question_submissions (
+//   id uuid default gen_random_uuid() primary key,
+//   file_url text not null,
+//   file_name text not null,
+//   subject text not null check (subject in ('Methods', 'Specialist')),
+//   status text not null default 'pending' check (status in ('pending', 'selected', 'archived')),
+//   uploaded_at timestamp with time zone default now()
+// );
+// Also create a Storage bucket named 'question-uploads' (public).
+
+import type { QuestionSubmission } from './types'
+
+export async function getSelectedQuestions(): Promise<QuestionSubmission[]> {
+  const { data, error } = await supabase
+    .from('question_submissions')
+    .select('*')
+    .eq('status', 'selected')
+    .order('uploaded_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching selected questions:', JSON.stringify(error, null, 2))
+    return []
+  }
+
+  return data?.map(q => ({
+    id: q.id,
+    fileUrl: q.file_url,
+    fileName: q.file_name,
+    subject: q.subject,
+    status: q.status,
+    uploadedAt: q.uploaded_at,
+  })) || []
+}
+
+export async function getQuestionSubmissions(): Promise<QuestionSubmission[]> {
+  const { data, error } = await supabase
+    .from('question_submissions')
+    .select('*')
+    .order('uploaded_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching question submissions:', JSON.stringify(error, null, 2))
+    return []
+  }
+
+  return data?.map(q => ({
+    id: q.id,
+    fileUrl: q.file_url,
+    fileName: q.file_name,
+    subject: q.subject,
+    status: q.status,
+    uploadedAt: q.uploaded_at,
+  })) || []
+}
+
+export async function setQuestionStatus(
+  id: string,
+  status: QuestionSubmission['status']
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('question_submissions')
+    .update({ status })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error updating question status:', JSON.stringify(error, null, 2))
+    return false
+  }
+  return true
+}
+
 export function extractYouTubeId(url: string): string | null {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)
