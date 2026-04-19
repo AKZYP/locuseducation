@@ -33,6 +33,17 @@ export function MissionClient() {
   const [displayed, setDisplayed] = useState('')
   const [cursorOn, setCursorOn] = useState(true)
 
+  // Scroll-reveal via IntersectionObserver — fires after intro is done
+  useEffect(() => {
+    if (phase !== 'done') return
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(el => { if (el.isIntersecting) el.target.classList.add('in-view') }),
+      { threshold: 0.12 }
+    )
+    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [phase])
+
   // Single effect — runs once on mount, drives the whole sequence via closure
   useEffect(() => {
     if (phase === 'done') return
@@ -213,6 +224,40 @@ export function MissionClient() {
           animation:
             eq-in-right 1s cubic-bezier(0.22,1,0.36,1) both,
             float-drift 14s ease-in-out 1s infinite;
+        }
+
+        /* Scroll reveal */
+        .scroll-reveal {
+          opacity: 0;
+          transform: translateY(28px);
+          transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .scroll-reveal.in-view {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        /* What It's Not strikethrough */
+        .not-item {
+          position: relative;
+          display: block;
+        }
+        .not-item::after {
+          content: '';
+          position: absolute;
+          left: 0; right: 0;
+          top: 54%;
+          height: 2.5px;
+          background: var(--rust);
+          transform: scaleX(0);
+          transform-origin: left;
+        }
+        .not-item.in-view::after {
+          animation: strike 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--strike-delay, 0s) both;
+        }
+        @keyframes strike {
+          from { transform: scaleX(0); }
+          to   { transform: scaleX(1); }
         }
 
         /* Doodles */
@@ -415,7 +460,7 @@ export function MissionClient() {
 
             {/* What This Is */}
             <section className="mt-24 space-y-8">
-              <div className="space-y-3">
+              <div className="space-y-3 scroll-reveal">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive">What This Is</p>
                 <h2 className="serif text-4xl md:text-5xl ink leading-[1.1]">
                   Real tutoring.{' '}
@@ -432,10 +477,11 @@ export function MissionClient() {
                   { title: 'Live Sessions', desc: 'Weekly streams that break concepts down properly — not just slides being read.', glyph: '∫' },
                   { title: 'Recordings',    desc: 'Miss it? Rewatch it. Every session stays up, forever.',                         glyph: '▸' },
                   { title: 'Resources',     desc: 'Cheat sheets and study guides. Straight to the point. Save you hours.',          glyph: 'Σ' },
-                ].map(({ title, desc, glyph }) => (
+                ].map(({ title, desc, glyph }, i) => (
                   <div
                     key={title}
-                    className="relative bg-[color-mix(in_oklab,var(--paper)_60%,white_40%)] border border-[var(--paper-line)] rounded-sm p-6 hover:border-[var(--olive)] hover:-translate-y-0.5 transition-all duration-300"
+                    className="scroll-reveal relative bg-[color-mix(in_oklab,var(--paper)_60%,white_40%)] border border-[var(--paper-line)] rounded-sm p-6 hover:border-[var(--olive)] hover:-translate-y-0.5 transition-all duration-300"
+                    style={{ transitionDelay: `${i * 0.1}s` }}
                   >
                     <div className="serif olive text-4xl mb-3 leading-none">{glyph}</div>
                     <h3 className="serif text-xl ink mb-1.5">{title}</h3>
@@ -447,22 +493,22 @@ export function MissionClient() {
 
             {/* What It's Not */}
             <section className="mt-20">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive mb-6">What It&apos;s Not</p>
-              <div className="flex flex-wrap gap-3">
-                {['Subscriptions', 'Hidden costs', 'Premium tiers', 'Free trials', 'Paywalls'].map((item) => (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] rust mb-8">What It&apos;s Not</p>
+              <div className="space-y-2">
+                {['Subscriptions', 'Hidden costs', 'Premium tiers', 'Free trials', 'Paywalls'].map((item, i) => (
                   <div
                     key={item}
-                    className="inline-flex items-center gap-2 border border-[var(--paper-line)] bg-[color-mix(in_oklab,var(--paper)_50%,white_50%)] rounded-full px-5 py-2"
+                    className="not-item scroll-reveal"
+                    style={{ transitionDelay: `${i * 0.07}s`, '--strike-delay': `${i * 0.11 + 0.2}s` } as React.CSSProperties}
                   >
-                    <span className="rust text-base leading-none">✕</span>
-                    <span className="serif-italic text-[15px] ink-soft">{item}</span>
+                    <span className="serif text-3xl md:text-4xl ink-soft">{item}</span>
                   </div>
                 ))}
               </div>
             </section>
 
             {/* Why This Exists */}
-            <section className="mt-24 relative py-12 border-y-2 border-[var(--ink)]">
+            <section className="mt-24 relative py-12 border-y-2 border-[var(--ink)] scroll-reveal">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] ink-muted mb-8">Why This Exists</p>
               <div className="space-y-2">
                 <p className="serif text-5xl md:text-6xl ink leading-[1.05]">Because ability isn&apos;t the issue.</p>
@@ -486,8 +532,8 @@ export function MissionClient() {
                   { step: 'I.',   title: 'Join weekly live sessions', desc: 'Show up online. Ask questions. Learn alongside other students in real time.' },
                   { step: 'II.',  title: 'Learn step-by-step',        desc: 'No skipping. No fluff. Concepts built from the ground up until they click.' },
                   { step: 'III.', title: 'Rewatch + use resources',   desc: 'Every session recorded. Study guides always free. Revisit anything, anytime.' },
-                ].map(({ step, title, desc }) => (
-                  <div key={step} className="flex gap-6 items-start pb-8 border-b border-[var(--paper-line)] last:border-0">
+                ].map(({ step, title, desc }, i) => (
+                  <div key={step} className="scroll-reveal flex gap-6 items-start pb-8 border-b border-[var(--paper-line)] last:border-0" style={{ transitionDelay: `${i * 0.12}s` }}>
                     <div className="serif-italic text-3xl olive leading-none tabular-nums pt-1 w-14 shrink-0">{step}</div>
                     <div className="space-y-1.5">
                       <h3 className="serif text-2xl ink leading-snug">{title}</h3>
