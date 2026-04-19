@@ -403,35 +403,12 @@ export function MissionClient() {
               </div>
             </section>
 
-            {/* The Gap */}
-            <section className="mt-20">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] olive mb-6">The Gap</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-6 border-b border-[var(--paper-line)]">
-                <div className="space-y-2">
-                  <p className="serif text-6xl ink leading-none">
-                    $100<span className="serif-italic text-2xl ink-muted">/hr</span>
-                  </p>
-                  <p className="text-sm ink-soft serif-italic">what families pay for private tutoring</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="serif text-6xl olive leading-none">
-                    $0<span className="serif-italic text-2xl ink-muted">/hr</span>
-                  </p>
-                  <p className="text-sm ink-soft serif-italic">what everyone else has to work with</p>
-                </div>
-              </div>
-              <p className="mt-6 serif text-xl ink leading-relaxed">
-                Same classroom. Same curriculum.{' '}
-                <span className="serif-italic">Completely different outcomes.</span>
-              </p>
-            </section>
-
             {/* Pull quote */}
-            <section className="mt-24 relative">
+            <section className="mt-8 relative">
               <span className="serif absolute -top-10 -left-2 text-8xl olive opacity-30 leading-none">&ldquo;</span>
               <p className="serif text-3xl md:text-4xl ink leading-snug max-w-2xl pl-8">
                 If I could take easy money from this system,{' '}
-                <span className="serif-italic olive">I can also be the one to break it.</span>
+                <span className="serif-italic olive font-bold">I can also be the one to break it.</span>
               </p>
               <p className="mt-4 pl-8 text-sm ink-muted serif-italic">— Why I started Locus</p>
             </section>
