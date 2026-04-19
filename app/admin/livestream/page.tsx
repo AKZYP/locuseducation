@@ -11,7 +11,7 @@ export default function AdminLivestreamPage() {
     title: '',
     scheduledDate: '',
     scheduledTime: '',
-    youtubeUrl: '',
+    meetingUrl: '',
     description: ''
   })
   const [saved, setSaved] = useState(false)
@@ -30,7 +30,7 @@ export default function AdminLivestreamPage() {
         title: data.title,
         scheduledDate: date.toISOString().split('T')[0],
         scheduledTime: date.toTimeString().slice(0, 5),
-        youtubeUrl: data.youtubeUrl || '',
+        meetingUrl: data.youtubeUrl || '',
         description: data.description
       })
     }
@@ -45,7 +45,7 @@ export default function AdminLivestreamPage() {
     const updatedStream = {
       title: form.title,
       scheduledDate,
-      youtubeUrl: form.youtubeUrl,
+      youtubeUrl: form.meetingUrl,
       description: form.description
     }
 
@@ -70,7 +70,7 @@ export default function AdminLivestreamPage() {
 
 📅 ${dateStr} at ${timeStr}
 ${form.description ? `📝 ${form.description}\n` : ''}
-🔗 Watch live: ${form.youtubeUrl || 'Link TBA'}
+🔗 Join live: ${form.meetingUrl || 'Link TBA'}
 
 See you there! 🚀`
 
@@ -142,12 +142,12 @@ See you there! 🚀`
           </div>
           
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">YouTube URL</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Meeting link</label>
             <input
               type="url"
-              value={form.youtubeUrl}
-              onChange={(e) => setForm({ ...form, youtubeUrl: e.target.value })}
-              placeholder="https://youtube.com/watch?v=..."
+              value={form.meetingUrl}
+              onChange={(e) => setForm({ ...form, meetingUrl: e.target.value })}
+              placeholder="https://zoom.us/j/..."
               className="w-full rounded-lg border-0 bg-secondary/50 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
