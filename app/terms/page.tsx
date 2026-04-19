@@ -49,7 +49,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Who we are</h2>
             <p className="text-[15px] text-muted-foreground leading-relaxed">
-              Locus Education is a student-run initiative providing free QCE tutoring in Queensland,
+              Locus Tutoring is a student-run initiative providing free QCE tutoring in Queensland,
               Australia. We are not a registered business. If you have any questions, reach out via the
               contact details on our social pages.
             </p>

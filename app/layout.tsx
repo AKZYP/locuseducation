@@ -23,7 +23,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: 'Locus Education | Free QCE Tutoring',
+  title: 'Locus Tutoring | Free QCE Tutoring',
   description: 'Quality tutoring shouldn\'t cost a fortune. Join our free weekly livestreams and access our complete video library. Free QCE tutoring, accessible to everyone.',
   generator: 'locuseducation.com',
   icons: {

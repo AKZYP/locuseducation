@@ -36,10 +36,10 @@ function generateICS(hidden: Set<QCESubject>, adminEvents: CalendarEvent[]): str
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Locus Education//Schedule//EN',
+    'PRODID:-//Locus Tutoring//Schedule//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Locus Education Schedule',
+    'X-WR-CALNAME:Locus Tutoring Schedule',
     'X-WR-TIMEZONE:Australia/Brisbane',
   ]
 
@@ -70,7 +70,7 @@ function generateICS(hidden: Set<QCESubject>, adminEvents: CalendarEvent[]): str
       lines.push(`UID:locus-${subject.toLowerCase()}-${y}${m}${d}@locuseducation`)
       lines.push(`DTSTART;TZID=Australia/Brisbane:${y}${m}${d}T170000`)
       lines.push(`DTEND;TZID=Australia/Brisbane:${y}${m}${d}T180000`)
-      lines.push(`SUMMARY:${title} — Locus Education`)
+      lines.push(`SUMMARY:${title} — Locus Tutoring`)
       lines.push(`DESCRIPTION:${desc}`)
       lines.push('END:VEVENT')
     }

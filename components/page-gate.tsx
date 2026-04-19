@@ -30,7 +30,7 @@ export function PageGate({ page, children }: { page: string; children: React.Rea
             <p className="text-sm text-muted-foreground leading-relaxed">
               We&apos;re working on this section. Check back soon.
             </p>
-            <p className="mt-5 text-xs text-muted-foreground/50">locus education</p>
+            <p className="mt-5 text-xs text-muted-foreground/50">locus tutoring</p>
           </div>
         </div>
       </div>

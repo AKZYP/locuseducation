@@ -35,7 +35,7 @@ export function ShutdownOverlay() {
         <p className="text-sm text-muted-foreground leading-relaxed">
           We&apos;re taking a short break. All sessions and resources will be back up shortly — check back soon.
         </p>
-        <p className="mt-5 text-xs text-muted-foreground/60">locus education</p>
+        <p className="mt-5 text-xs text-muted-foreground/60">locus tutoring</p>
       </div>
     </div>
   )
