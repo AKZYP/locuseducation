@@ -319,38 +319,86 @@ export function MissionClient() {
           <div className={phase === 'done' ? 'content-reveal' : 'content-hidden'}>
 
             {/* My Story */}
-            <section className="mt-20 space-y-8">
+            <section className="mt-20 space-y-10">
               <div className="flex items-center gap-4">
                 <div className="h-px flex-1 bg-[var(--paper-line)]" />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] ink-muted">My Story</p>
                 <div className="h-px flex-1 bg-[var(--paper-line)]" />
               </div>
 
+              {/* Author */}
+              <p className="serif-italic text-sm ink-muted -mt-4">by Rishabh Patel</p>
+
+              {/* Opening stat */}
+              <div className="space-y-2">
+                <p className="text-[17px] ink-soft leading-7">
+                  I used to charge <span className="serif ink font-semibold">$70 to $100 an hour</span> per student.
+                </p>
+                <div className="my-6 border-l-2 border-[var(--olive)] pl-5">
+                  <p className="serif text-2xl md:text-3xl ink leading-snug">
+                    At one point I had enough students to make{' '}
+                    <span className="olive">$500+ a week</span>{' '}
+                    for 7–8 hours of work.
+                  </p>
+                </div>
+              </div>
+
+              {/* Drop */}
+              <p className="serif text-3xl md:text-4xl ink leading-snug">
+                Then I dropped all of it.
+              </p>
+
+              {/* Grade 12 section */}
               <div className="space-y-5 text-[17px] ink-soft leading-7">
                 <p>
-                  I know the <span className="serif-italic ink">value</span> of good tutoring. I&apos;ve been on the receiving end of it.
+                  When I was in grade 12, I had a tutor.
                 </p>
                 <p>
-                  A tutor helped me understand Maths in ways that finally clicked — explaining concepts properly, breaking down hard problems step by step, making studying feel possible instead of hopeless. My grades changed. My confidence changed. I saw what good teaching actually does.
+                  In all honesty, while it helped, I didn&apos;t benefit that much from the teaching.
+                  It was mainly the <span className="serif-italic ink">idea</span> that I was paying that forced me to lock in.
                 </p>
               </div>
 
-              <p className="serif text-2xl md:text-[1.75rem] ink leading-snug border-l-2 border-[var(--olive)] pl-5">
-                That tutor charged $80 an hour. For many families, even that is out of reach.
+              <p className="serif text-2xl md:text-3xl ink leading-snug">
+                Then I became the tutor.
               </p>
 
               <div className="space-y-5 text-[17px] ink-soft leading-7">
                 <p>
-                  After I graduated, I started tutoring other students myself. And I charged $70 to $100 an hour. It felt easy. The money was good. I was technically helping people, right?
+                  I knew I was good at what I did. Being a high school teacher is something I hope to start doing when I&apos;m older.
+                  I could explain things clearly, and students gave positive feedback.
                 </p>
                 <p>
-                  But here&apos;s what I didn&apos;t think about then: the 16-year-old who can&apos;t ask their parents for another $80 session. The brilliant student sitting in class struggling alone because their family just can&apos;t afford help — even though they need it more than anyone.
+                  But every time a student paid me, it felt awkward.{' '}
+                  <span className="serif-italic ink">Transactional.</span>
                 </p>
                 <p>
-                  And I noticed something else. A lot of tutors out there aren&apos;t resourceful. They&apos;re teaching outdated syllabus content. They&apos;re unprofessional. And they&apos;re still charging $70–100 an hour. No wonder students feel ripped off. No wonder access to <span className="serif-italic ink">good</span> tutoring stays locked behind a paywall.
+                  The more I thought about it, the less I liked the model.
                 </p>
-                <p className="serif-italic text-xl ink">
-                  So I&apos;m doing this differently.
+                <p>
+                  I didn&apos;t want to spend my limited free time helping a small number of people who could afford it.
+                </p>
+                <p>
+                  I&apos;d rather help more people for a fraction of the price.
+                </p>
+              </div>
+
+              {/* Free.99 */}
+              <div className="py-6 border-y border-[var(--paper-line)]">
+                <p className="serif text-4xl md:text-5xl ink leading-none">
+                  $FREE.99
+                </p>
+                <p className="mt-2 text-sm ink-muted serif-italic">
+                  ($0 — and yeah, 0 isn&apos;t technically a fraction of an integer, but you get the point.)
+                </p>
+              </div>
+
+              {/* Conclusion */}
+              <div className="space-y-5 text-[17px] ink-soft leading-7">
+                <p className="serif text-2xl md:text-3xl ink">So I dropped it.</p>
+                <p>Believe me, it was some of the easiest money I could make.</p>
+                <p className="serif-italic text-[15px] ink-muted">
+                  I just didn&apos;t want to keep making it that way.
                 </p>
               </div>
             </section>
