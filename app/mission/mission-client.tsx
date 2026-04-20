@@ -25,53 +25,6 @@ const SIDE_EQUATIONS_RIGHT = [
   { top: '88%', text: 'y = mx + b' },
 ]
 
-const IMPACT_STATS = [
-  { value: 500, suffix: '+', label: 'Students reached', prefix: '' },
-  { value: 100, suffix: '%', label: 'Free, no catch', prefix: '' },
-  { value: 0,   suffix: '',  label: 'Cost to join', prefix: '$' },
-]
-
-function useCountUp(target: number, duration = 1400, start = false) {
-  const [count, setCount] = useState(0)
-  useEffect(() => {
-    if (!start) return
-    if (target === 0) { setCount(0); return }
-    let startTime: number
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp
-      const progress = Math.min((timestamp - startTime) / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setCount(Math.round(eased * target))
-      if (progress < 1) requestAnimationFrame(step)
-    }
-    requestAnimationFrame(step)
-  }, [start, target, duration])
-  return count
-}
-
-function StatCounter({ value, suffix, prefix, label }: { value: number; suffix: string; prefix: string; label: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [started, setStarted] = useState(false)
-  const count = useCountUp(value, 1600, started)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setStarted(true); obs.disconnect() } }, { threshold: 0.5 })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
-
-  return (
-    <div ref={ref} className="stat-counter text-center">
-      <div className="serif text-6xl md:text-7xl ink leading-none stat-number">
-        {prefix}{count}{suffix}
-      </div>
-      <p className="mt-3 text-sm uppercase tracking-[0.18em] ink-muted font-semibold">{label}</p>
-    </div>
-  )
-}
-
 export function MissionClient() {
   const [phase, setPhase] = useState<Phase>(() => {
     if (typeof window === 'undefined') return 'typing'
@@ -79,17 +32,7 @@ export function MissionClient() {
   })
   const [displayed, setDisplayed] = useState('')
   const [cursorOn, setCursorOn] = useState(true)
-  const [scrollY, setScrollY] = useState(0)
-  const mouseRef = useRef({ x: 0, y: 0 })
   const eqsRef = useRef<HTMLSpanElement[]>([])
-
-  // Scroll parallax for background elements
-  useEffect(() => {
-    if (phase !== 'done') return
-    const onScroll = () => setScrollY(window.scrollY)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [phase])
 
   // Mouse parallax on floating equations
   useEffect(() => {
@@ -102,7 +45,6 @@ export function MissionClient() {
         const factor = (i % 3 === 0 ? 1 : i % 3 === 1 ? 0.6 : 0.3)
         el.style.transform = `translate(${dx * factor}px, ${dy * factor}px)`
       })
-      mouseRef.current = { x: dx, y: dy }
     }
     window.addEventListener('mousemove', onMouse, { passive: true })
     return () => window.removeEventListener('mousemove', onMouse)
@@ -342,24 +284,6 @@ export function MissionClient() {
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-        }
-
-        /* ── Impact strip ── */
-        .impact-strip {
-          background: var(--ink);
-          color: var(--paper);
-          position: relative;
-          overflow: hidden;
-        }
-        .impact-strip::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background-image: repeating-linear-gradient(
-            transparent 0px, transparent 31px,
-            rgba(255,255,255,0.04) 31px, rgba(255,255,255,0.04) 32px
-          );
-          pointer-events: none;
         }
 
         /* ── Highlight marker animation ── */
@@ -678,29 +602,6 @@ export function MissionClient() {
           </header>
 
           <div className={phase === 'done' ? 'content-reveal' : 'content-hidden'}>
-
-            {/* ── Impact stats strip ── */}
-            <section className="mt-20 -mx-6 px-6 py-14 impact-strip scroll-reveal scale-in">
-              <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] mb-10" style={{ color: 'rgba(250,247,239,0.5)' }}>By the numbers</p>
-              <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto">
-                {IMPACT_STATS.map((s, i) => (
-                  <div key={i} style={{ transitionDelay: `${i * 0.15}s` }}>
-                    <StatCounter {...s} />
-                  </div>
-                ))}
-              </div>
-              <style>{`
-                .impact-strip .stat-number {
-                  background: linear-gradient(135deg, #faf7ef 0%, #93a178 100%);
-                  -webkit-background-clip: text;
-                  -webkit-text-fill-color: transparent;
-                  background-clip: text;
-                }
-                .impact-strip .stat-counter { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
-                .impact-strip .stat-counter.in-view { opacity: 1; transform: translateY(0); }
-                .impact-strip p { color: rgba(250,247,239,0.6); }
-              `}</style>
-            </section>
 
             {/* ── My Story ── */}
             <section className="mt-24 space-y-10">
